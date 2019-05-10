@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_more"
+        android:icon="@drawable/ic_more_vert_white_24dp"
+        android:title=""
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_list"
+                android:icon="@drawable/ic_person_add_black_24dp"
+                android:title="@string/shebei_list"
+                app:showAsAction="ifRoom" />
+
+            <item
+                android:id="@+id/action_research"
+                android:icon="@drawable/ic_settings_black_24dp"
+                android:title="@string/shebei_research"
+                app:showAsAction="ifRoom" />
+
+            <item
+                android:id="@+id/action_luru"
+                android:icon="@drawable/ic_info_outline_black_24dp"
+                android:title="@string/shebei_luru"
+                app:showAsAction="ifRoom" />
+        </menu>
+
+    </item>
+
+</menu>
