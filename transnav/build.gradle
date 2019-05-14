@@ -5,7 +5,7 @@ android {
         version {
             keyAlias 'enav'
             keyPassword 'tcup#2019'
-            storeFile file('C:/Users/admin/Desktop/enav.jks')
+            storeFile file('../enav.jks')s
             storePassword 'tcup#2019'
         }
     }

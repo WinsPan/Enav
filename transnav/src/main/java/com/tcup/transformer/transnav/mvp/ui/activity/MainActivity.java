@@ -222,7 +222,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_list:
-                Toast.makeText(this, "Settings option menu clicked!", Toast.LENGTH_SHORT).show();
+
                 return true;
             case R.id.action_research:
                 Toast.makeText(this, "Add Contact option menu clicked!", Toast.LENGTH_SHORT).show();
