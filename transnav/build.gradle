@@ -5,7 +5,7 @@ android {
         version {
             keyAlias 'enav'
             keyPassword 'tcup#2019'
-            storeFile file('../enav.jks')s
+            storeFile file('enav.jks')
             storePassword 'tcup#2019'
         }
     }
@@ -25,6 +25,7 @@ android {
         targetSdkVersion rootProject.ext.android["targetSdkVersion"]
         versionCode rootProject.ext.android["versionCode"]
         versionName rootProject.ext.android["versionName"]
+        multiDexEnabled true
 
         ndk { abiFilters "armeabi", "armeabi-v7a" }
     }
@@ -74,6 +75,7 @@ dependencies {
     //navi-3dmap
     implementation rootProject.ext.dependencies["navi-3dmap"]
     implementation rootProject.ext.dependencies["location"]
+    implementation rootProject.ext.dependencies["search"]
 
     //tools
     annotationProcessor rootProject.ext.dependencies["dagger2-compiler"]
@@ -89,5 +91,8 @@ dependencies {
     implementation rootProject.ext.dependencies["androideventbus"]
 //    implementation rootProject.ext.dependencies["eventbus"]
     implementation 'me.jessyan:arms-imageloader-glide:2.5.0'
+
+
+    implementation rootProject.ext.dependencies["multidex"]
     //test
 }

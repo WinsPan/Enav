@@ -11,16 +11,17 @@ ext {
     ]
 
     version = [
-            androidSupportSdkVersion: "28.0.0",
-            retrofitSdkVersion      : "2.4.0",
-            dagger2SdkVersion       : '2.19',
-            glideSdkVersion         : "4.8.0",
-            butterknifeSdkVersion   : '8.8.1',
-            rxlifecycleSdkVersion   : "1.0",
-            rxlifecycle2SdkVersion  : "2.2.2",
-            espressoSdkVersion      : "3.0.1",
-            canarySdkVersion        : "1.5.4",
-            amapVersion             : "latest.integration"
+            androidSupportSdkVersion            : "28.0.0",
+            retrofitSdkVersion                  : "2.4.0",
+            dagger2SdkVersion                   : '2.19',
+            glideSdkVersion                     : "4.8.0",
+            butterknifeSdkVersion               : '8.8.1',
+            rxlifecycleSdkVersion               : "1.0",
+            rxlifecycle2SdkVersion              : "2.2.2",
+            espressoSdkVersion                  : "3.0.1",
+            canarySdkVersion                    : "1.5.4",
+            amapVersion                         : "latest.integration",
+            BaseRecyclerViewAdapterHelperVersion: '2.9.46'
     ]
 
     dependencies = [
@@ -119,5 +120,7 @@ ext {
             "search"                   : "com.amap.api:search:${version["amapVersion"]}",
             //定位
             "location"                 : "com.amap.api:location:${version["amapVersion"]}",
+            //BaseRecyclerViewAdapterHelper
+            "BaseRecyclerViewAdapterHelper":"com.github.CymChad:BaseRecyclerViewAdapterHelper:${version["BaseRecyclerViewAdapterHelperVersion"]}",
     ]
 }

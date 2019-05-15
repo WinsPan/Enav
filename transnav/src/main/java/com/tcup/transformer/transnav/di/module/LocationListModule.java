@@ -1,13 +1,24 @@
 package com.tcup.transformer.transnav.di.module;
 
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+
 import com.jess.arms.di.scope.ActivityScope;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
+import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.model.LocationListModel;
+import com.tcup.transformer.transnav.mvp.ui.adapter.MarkBeanAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -27,4 +38,28 @@ public abstract class LocationListModule {
 
     @Binds
     abstract LocationListContract.Model bindLocationListModel(LocationListModel model);
+
+    @ActivityScope
+    @Provides
+    static RxPermissions provideRxPermissions(LocationListContract.View view) {
+        return new RxPermissions((FragmentActivity) view.getActivity());
+    }
+
+    @ActivityScope
+    @Provides
+    static RecyclerView.LayoutManager provideLayoutManager(LocationListContract.View view) {
+        return new GridLayoutManager(view.getActivity(), 2);
+    }
+
+    @ActivityScope
+    @Provides
+    static List<MarketBean> provideMarkBeanList() {
+        return new ArrayList<>();
+    }
+
+    @ActivityScope
+    @Provides
+    static RecyclerView.Adapter provideMarkBeanAdapter(List<MarketBean> list) {
+        return new MarkBeanAdapter(list);
+    }
 }
