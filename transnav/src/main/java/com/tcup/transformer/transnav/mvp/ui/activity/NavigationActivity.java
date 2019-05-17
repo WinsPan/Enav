@@ -1,30 +1,23 @@
 package com.tcup.transformer.transnav.mvp.ui.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.amap.api.location.AMapLocation;
-import com.amap.api.location.AMapLocationClient;
-import com.amap.api.location.AMapLocationClientOption;
-import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
-import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.CameraPosition;
@@ -32,6 +25,8 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.navi.AMapNavi;
 import com.amap.api.navi.AMapNaviListener;
+import com.amap.api.navi.AMapNaviViewListener;
+import com.amap.api.navi.enums.PathPlanningStrategy;
 import com.amap.api.navi.model.AMapCalcRouteResult;
 import com.amap.api.navi.model.AMapLaneInfo;
 import com.amap.api.navi.model.AMapModelCross;
@@ -48,39 +43,60 @@ import com.amap.api.navi.model.AimLessModeStat;
 import com.amap.api.navi.model.NaviInfo;
 import com.amap.api.navi.model.NaviLatLng;
 import com.amap.api.navi.view.RouteOverLay;
-import com.amap.api.services.core.LatLonPoint;
-import com.amap.api.services.help.Tip;
 import com.autonavi.tbt.TrafficFacilityInfo;
+import com.jess.arms.base.BaseActivity;
+import com.jess.arms.di.component.AppComponent;
+import com.jess.arms.utils.ArmsUtils;
 import com.tcup.transformer.transnav.R;
-import com.tcup.transformer.transnav.mvp.ui.activity.nav.ActNavActivity;
+import com.tcup.transformer.transnav.di.component.DaggerNavigationComponent;
+import com.tcup.transformer.transnav.mvp.contract.NavigationContract;
+import com.tcup.transformer.transnav.mvp.presenter.NavigationPresenter;
 import com.zhy.adapter.recyclerview.CommonAdapter;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
-
-import org.simple.eventbus.EventBus;
-import org.simple.eventbus.Subscriber;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import butterknife.BindView;
+
+import static com.jess.arms.utils.Preconditions.checkNotNull;
 import static com.tcup.transformer.transnav.R.id.ll_itemview;
 
-public class NavigationActivity extends AppCompatActivity implements View.OnClickListener, LocationSource, AMapLocationListener, AMapNaviListener {
+
+/**
+ * ================================================
+ * Description:
+ * <p>
+ * Created by MVPArmsTemplate on 05/17/2019 09:17
+ * <a href="mailto:jess.yan.effort@gmail.com">Contact me</a>
+ * <a href="https://github.com/JessYanCoding">Follow me</a>
+ * <a href="https://github.com/JessYanCoding/MVPArms">Star me</a>
+ * <a href="https://github.com/JessYanCoding/MVPArms/wiki">See me</a>
+ * <a href="https://github.com/JessYanCoding/MVPArmsTemplate">模版请保持更新</a>
+ * ================================================
+ */
+public class NavigationActivity extends BaseActivity<NavigationPresenter> implements NavigationContract.View, AMapNaviListener, AMapNaviViewListener, View.OnClickListener {
+
     private static final String TAG = "NavigationActivity";
-    private TabLayout mTabLayout;
-    private TextView tvNavi;
-    private RelativeLayout oneWay;
-    private TextView tvTime, tvLength;
+    @BindView(R.id.tabs)
+    TabLayout mTabLayout;
+    @BindView(R.id.rl_tv_navistart)
+    TextView tvNavi;
+    @BindView(R.id.ll_rl_1way)
+    RelativeLayout oneWay;
+    @BindView(R.id.rl_tv_time)
+    TextView tvTime;
+    @BindView(R.id.rl_tv_length)
+    TextView tvLength;
+    @BindView(R.id.rl_rlv_ways)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.navi_view)
+    MapView mapview;
     private int navigationType = 0;
     private AMap amap;
-    private MapView mapview;
-    private OnLocationChangedListener mListener;
-    private AMapLocationClient mlocationClient;
-    private AMapLocationClientOption mLocationOption;
-    private RecyclerView mRecyclerView;
     private CommonAdapter mAdapter;
     private int currentPosition, lastPosition = -1;
-    private SharedPreferences sharedPreferences;
     /**************************************************导航相关************************************** ********************/
     private AMapNavi mAMapNavi;
     /**
@@ -103,29 +119,35 @@ public class NavigationActivity extends AppCompatActivity implements View.OnClic
     private boolean calculateSuccess;
     private int routeIndex = 0;
     private int zindex = 0;
+    int strategy = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_navigation);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) actionBar.hide();
-        EventBus.getDefault().register(this);
-        initView();
-        mapview.onCreate(savedInstanceState);// 此方法必须重写
+    public void setupActivityComponent(@NonNull AppComponent appComponent) {
+        DaggerNavigationComponent //如找不到该类,请编译一下项目
+                .builder()
+                .appComponent(appComponent)
+                .view(this)
+                .build()
+                .inject(this);
+    }
+
+    @Override
+    public int initView(@Nullable Bundle savedInstanceState) {
+        return R.layout.activity_navigation; //如果你不需要框架帮你设置 setContentView(id) 需要自行设置,请返回 0
+    }
+
+    @Override
+    public void initData(@Nullable Bundle savedInstanceState) {
+        initViews();
+        mapview.onCreate(savedInstanceState);
         initMap();
     }
 
-    private void initView() {
-        mapview = (MapView) findViewById(R.id.navi_view);
-        mRecyclerView = (RecyclerView) findViewById(R.id.rl_rlv_ways);
+
+    private void initViews() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         mAdapter = getAdapter();
         mRecyclerView.setAdapter(mAdapter);
-        oneWay = (RelativeLayout) findViewById(R.id.ll_rl_1way);
-        tvTime = (TextView) findViewById(R.id.rl_tv_time);
-        tvLength = (TextView) findViewById(R.id.rl_tv_length);
-        mTabLayout = (TabLayout) findViewById(R.id.tabs);
         //tab的字体选择器,默认灰色,选择时白色
         mTabLayout.setTabTextColors(Color.LTGRAY, Color.WHITE);
         //设置tab的下划线颜色,默认是粉红色
@@ -133,16 +155,11 @@ public class NavigationActivity extends AppCompatActivity implements View.OnClic
         mTabLayout.addTab(mTabLayout.newTab().setText("驾车"));
         mTabLayout.addTab(mTabLayout.newTab().setText("步行"));
         mTabLayout.addTab(mTabLayout.newTab().setText("骑车"));
-        tvNavi = (TextView) findViewById(R.id.rl_tv_navistart);
         tvNavi.setOnClickListener(this);
-
-
         NaviLatLng startNav = (NaviLatLng) getIntent().getParcelableExtra("startNav");
         NaviLatLng endNav = (NaviLatLng) getIntent().getParcelableExtra("endNav");
-
         startList.add(startNav);
         endList.add(endNav);
-
         //添加Tab点击事件
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -186,7 +203,6 @@ public class NavigationActivity extends AppCompatActivity implements View.OnClic
             myLocationStyle.strokeColor(Color.TRANSPARENT);//设置定位蓝点精度圆圈的边框颜色
             myLocationStyle.radiusFillColor(Color.TRANSPARENT);//设置定位蓝点精度圆圈的填充颜色
             amap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
-            amap.setLocationSource(this);//设置了定位的监听,这里要实现LocationSource接口
             // 是否显示定位按钮
             settings.setMyLocationButtonEnabled(true);
             amap.setMyLocationEnabled(true);//显示定位层并且可以触发定位,默认是flase
@@ -207,158 +223,6 @@ public class NavigationActivity extends AppCompatActivity implements View.OnClic
     }
 
     /**
-     * 导航按钮点击事件实现方法
-     */
-    private void clickNavigation() {
-        if (startList.size() == 0) {
-//            Snackbar.make(tvEnd, "未获取到当前位置，不能导航", Snackbar.LENGTH_SHORT).show();
-        } else if (endList.size() == 0) {
-//            Snackbar.make(tvEnd, "未获取到终点，不能导航", Snackbar.LENGTH_SHORT).show();
-        } else {
-            if (!calculateSuccess) {
-//                Snackbar.make(tvEnd, "请先计算路线", Snackbar.LENGTH_SHORT).show();
-                return;
-            } else {//实时导航
-                if (routeIndex > ways.size()) {
-                    routeIndex = 0;
-                }
-                mAMapNavi.selectRouteId(routeOverlays.keyAt(routeIndex));
-                Intent gpsintent = new Intent(this, ActNavActivity.class);
-                startActivity(gpsintent);
-
-            }
-        }
-    }
-
-    /**
-     * 绘制路线
-     *
-     * @param routeId
-     * @param path
-     */
-    private void drawRoutes(int routeId, AMapNaviPath path) {
-        calculateSuccess = true;
-        amap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(startList.get(0).getLatitude(), startList.get(0).getLongitude()), 12, 0, 0)));
-        RouteOverLay routeOverLay = new RouteOverLay(amap, path, this);
-        routeOverLay.setTrafficLine(false);
-        routeOverLay.setTrafficLightsVisible(false);
-        routeOverLay.addToMap();
-        routeOverlays.put(routeId, routeOverLay);
-    }
-
-
-    /**
-     * 获取终点信息
-     *
-     * @param tip
-     */
-    @Subscriber
-    public void choicePoint(Tip tip) {
-//        tvEnd.setText("到     " + tip.getDistrict());
-        LatLonPoint endLp = tip.getPoint();
-        endList.clear();
-        endList.add(new NaviLatLng(endLp.getLatitude(), endLp.getLongitude()));
-    }
-
-    ;
-
-    /**
-     * 多条路线计算结果回调2
-     *
-     * @param ints
-     */
-//    @Override
-    private void onCalculateMultipleRoutesSuccessOld(int[] ints) {
-        //清空上次计算的路径列表。
-        routeOverlays.clear();
-        ways.clear();
-        HashMap<Integer, AMapNaviPath> paths = mAMapNavi.getNaviPaths();
-        for (int i = 0; i < ints.length; i++) {
-            AMapNaviPath path = paths.get(ints[i]);
-            if (path != null) {
-                drawRoutes(ints[i], path);
-                ways.add(path);
-            }
-        }
-        if (ways.size() > 0) {
-            currentPosition = 0;
-            lastPosition = -1;
-            mAdapter.notifyDataSetChanged();
-            mRecyclerView.setVisibility(View.VISIBLE);
-            oneWay.setVisibility(View.GONE);
-            tvNavi.setText("开始导航");
-        } else if (ways.size() == 1) {
-            mRecyclerView.setVisibility(View.GONE);
-            oneWay.setVisibility(View.VISIBLE);
-            tvTime.setText(getTime(ways.get(0).getAllTime()));
-            tvLength.setText(getLength(ways.get(0).getAllLength()));
-            tvNavi.setText("开始导航");
-        } else {
-            mRecyclerView.setVisibility(View.GONE);
-            tvNavi.setText("准备导航");
-        }
-        changeRoute();
-    }
-
-    /**
-     * 单条路线计算结果回调2
-     */
-//    @Override
-    private void onCalculateRouteSuccessOld() {
-        /**
-         * 清空上次计算的路径列表。
-         */
-        routeOverlays.clear();
-        ways.clear();
-        AMapNaviPath path = mAMapNavi.getNaviPath();
-        /**
-         * 单路径不需要进行路径选择，直接传入－1即可
-         */
-        drawRoutes(-1, path);
-        mRecyclerView.setVisibility(View.GONE);
-        oneWay.setVisibility(View.VISIBLE);
-        tvTime.setText(getTime(path.getAllTime()));
-        tvLength.setText(getLength(path.getAllLength()));
-        tvNavi.setText("开始导航");
-    }
-
-    /**
-     * 选择路线
-     */
-    public void changeRoute() {
-        if (!calculateSuccess) {
-            Toast.makeText(this, "请先算路", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        /**
-         * 计算出来的路径只有一条
-         */
-        if (routeOverlays.size() == 1) {
-            //必须告诉AMapNavi 你最后选择的哪条路
-            mAMapNavi.selectRouteId(routeOverlays.keyAt(0));
-            return;
-        }
-
-        if (routeIndex >= routeOverlays.size())
-            routeIndex = 0;
-        //根据选中的路线下标值得到路线ID
-        int routeID = routeOverlays.keyAt(routeIndex);
-        //突出选择的那条路
-        for (int i = 0; i < routeOverlays.size(); i++) {
-            int key = routeOverlays.keyAt(i);
-            routeOverlays.get(key).setTransparency(0.4f);
-        }
-        routeOverlays.get(routeID).setTransparency(1);
-        /**把用户选择的那条路的权值弄高，使路线高亮显示的同时，重合路段不会变的透明**/
-        routeOverlays.get(routeID).setZindex(zindex++);
-
-        //必须告诉AMapNavi 你最后选择的哪条路
-        mAMapNavi.selectRouteId(routeID);
-        routeIndex++;
-
-    }
-
-    /**
      * 方法必须重写
      */
     @Override
@@ -370,65 +234,319 @@ public class NavigationActivity extends AppCompatActivity implements View.OnClic
     }
 
     /**
-     * 清除当前地图上算好的路线
+     * 方法必须重写
      */
-    private void clearRoute() {
-        for (int i = 0; i < routeOverlays.size(); i++) {
-            RouteOverLay routeOverlay = routeOverlays.valueAt(i);
-            routeOverlay.removeFromMap();
-        }
-        routeOverlays.clear();
-        ways.clear();
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        mapview.onResume();
+        clearRoute();
+        planRoute();//路线规划
     }
 
     /**
-     * 路线规划
+     * 方法必须重写
      */
-    private void planRoute() {
-        mRecyclerView.setVisibility(View.GONE);//多条路线规划结果
-        oneWay.setVisibility(View.GONE);//一条路线规划结果
-        if (startList.size() > 0 && endList.size() > 0) {
-            if (navigationType == 0) {//驾车
-                int strategy = 0;
-                try {
-                    /**
-                     * 方法:
-                     *   int strategy=mAMapNavi.strategyConvert(congestion, avoidhightspeed, cost, hightspeed, multipleroute);
-                     * 参数:
-                     * @congestion 躲避拥堵
-                     * @avoidhightspeed 不走高速
-                     * @cost 避免收费
-                     * @hightspeed 高速优先
-                     * @multipleroute 多路径
-                     *
-                     * 说明:
-                     *      以上参数都是boolean类型，其中multipleroute参数表示是否多条路线，如果为true则此策略会算出多条路线。
-                     * 注意:
-                     *      不走高速与高速优先不能同时为true
-                     *      高速优先与避免收费不能同时为true
-                     */
-                    strategy = mAMapNavi.strategyConvert(true, false, false, true, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                mAMapNavi.calculateDriveRoute(startList, endList, wayList, strategy);
-            } else if (navigationType == 1) {//步行
-                mAMapNavi.calculateWalkRoute(startList.get(0), endList.get(0));
-            } else {//骑行
-                mAMapNavi.calculateRideRoute(startList.get(0), endList.get(0));
-            }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapview.onPause();
+        clearRoute();
+    }
+
+    /**
+     * 方法必须重写
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mapview != null) {
+            mapview.onDestroy();
+        }
+        if (mAMapNavi != null) {
+            mAMapNavi.destroy();
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
+    }
+
+    @Override
+    public void showMessage(@NonNull String message) {
+        checkNotNull(message);
+        ArmsUtils.snackbarText(message);
+    }
+
+    @Override
+    public void launchActivity(@NonNull Intent intent) {
+        checkNotNull(intent);
+        ArmsUtils.startActivity(intent);
+    }
+
+    @Override
+    public void killMyself() {
+        finish();
+    }
+
+    /**************************************************导航相关************************************** ********************/
+
+    @Override
+    public void onInitNaviFailure() {
+
+    }
+
+    @Override
+    public void onInitNaviSuccess() {
+
+    }
+
+    @Override
+    public void onStartNavi(int i) {
+
+    }
+
+    @Override
+    public void onTrafficStatusUpdate() {
+
+    }
+
+    @Override
+    public void onLocationChange(AMapNaviLocation aMapNaviLocation) {
+
+    }
+
+    @Override
+    public void onGetNavigationText(int i, String s) {
+
+    }
+
+    @Override
+    public void onGetNavigationText(String s) {
+
+    }
+
+    @Override
+    public void onEndEmulatorNavi() {
+
+    }
+
+    @Override
+    public void onArriveDestination() {
+
+    }
 
     @Override
     public void onCalculateRouteFailure(int i) {
         calculateSuccess = false;
-//        Snackbar.make(tvEnd, "计算路线失败", Snackbar.LENGTH_SHORT).show();
+        ArmsUtils.snackbarText("路径计算失败");
+    }
+
+    @Override
+    public void onReCalculateRouteForYaw() {
 
     }
 
+    @Override
+    public void onReCalculateRouteForTrafficJam() {
 
+    }
+
+    @Override
+    public void onArrivedWayPoint(int i) {
+
+    }
+
+    @Override
+    public void onGpsOpenStatus(boolean b) {
+
+    }
+
+    @Override
+    public void onNaviInfoUpdate(NaviInfo naviInfo) {
+
+    }
+
+    @Override
+    public void onNaviInfoUpdated(AMapNaviInfo aMapNaviInfo) {
+
+    }
+
+    @Override
+    public void updateCameraInfo(AMapNaviCameraInfo[] aMapNaviCameraInfos) {
+
+    }
+
+    @Override
+    public void updateIntervalCameraInfo(AMapNaviCameraInfo aMapNaviCameraInfo, AMapNaviCameraInfo aMapNaviCameraInfo1, int i) {
+
+    }
+
+    @Override
+    public void onServiceAreaUpdate(AMapServiceAreaInfo[] aMapServiceAreaInfos) {
+
+    }
+
+    @Override
+    public void showCross(AMapNaviCross aMapNaviCross) {
+
+    }
+
+    @Override
+    public void hideCross() {
+
+    }
+
+    @Override
+    public void showModeCross(AMapModelCross aMapModelCross) {
+
+    }
+
+    @Override
+    public void hideModeCross() {
+
+    }
+
+    @Override
+    public void showLaneInfo(AMapLaneInfo[] aMapLaneInfos, byte[] bytes, byte[] bytes1) {
+
+    }
+
+    @Override
+    public void showLaneInfo(AMapLaneInfo aMapLaneInfo) {
+
+    }
+
+    @Override
+    public void hideLaneInfo() {
+
+    }
+
+    @Override
+    public void onCalculateRouteSuccess(int[] ints) {
+        if (ints.length == 1) {
+            onCalculateRouteSuccessOld();
+        } else {
+            onCalculateMultipleRoutesSuccessOld(ints);
+        }
+    }
+
+    @Override
+    public void notifyParallelRoad(int i) {
+
+    }
+
+    @Override
+    public void OnUpdateTrafficFacility(AMapNaviTrafficFacilityInfo aMapNaviTrafficFacilityInfo) {
+
+    }
+
+    @Override
+    public void OnUpdateTrafficFacility(AMapNaviTrafficFacilityInfo[] aMapNaviTrafficFacilityInfos) {
+
+    }
+
+    @Override
+    public void OnUpdateTrafficFacility(TrafficFacilityInfo trafficFacilityInfo) {
+
+    }
+
+    @Override
+    public void updateAimlessModeStatistics(AimLessModeStat aimLessModeStat) {
+
+    }
+
+    @Override
+    public void updateAimlessModeCongestionInfo(AimLessModeCongestionInfo aimLessModeCongestionInfo) {
+
+    }
+
+    @Override
+    public void onPlayRing(int i) {
+
+    }
+
+    @Override
+    public void onCalculateRouteSuccess(AMapCalcRouteResult aMapCalcRouteResult) {
+    }
+
+    @Override
+    public void onCalculateRouteFailure(AMapCalcRouteResult aMapCalcRouteResult) {
+        calculateSuccess = false;
+    }
+
+    @Override
+    public void onNaviRouteNotify(AMapNaviRouteNotifyData aMapNaviRouteNotifyData) {
+
+    }
+
+    @Override
+    public void onNaviSetting() {
+
+    }
+
+    @Override
+    public void onNaviCancel() {
+
+    }
+
+    @Override
+    public boolean onNaviBackClick() {
+        return false;
+    }
+
+    @Override
+    public void onNaviMapMode(int i) {
+
+    }
+
+    @Override
+    public void onNaviTurnClick() {
+
+    }
+
+    @Override
+    public void onNextRoadClick() {
+
+    }
+
+    @Override
+    public void onScanViewButtonClick() {
+
+    }
+
+    @Override
+    public void onLockMap(boolean b) {
+
+    }
+
+    @Override
+    public void onNaviViewLoaded() {
+
+    }
+
+    @Override
+    public void onMapTypeChanged(int i) {
+
+    }
+
+    @Override
+    public void onNaviViewShowMode(int i) {
+
+    }
+
+    /**********************adapter获取***************************/
     private CommonAdapter getAdapter() {
 
         return new CommonAdapter<AMapNaviPath>(this, R.layout.item_recycleview_naviways, ways) {
@@ -604,307 +722,192 @@ public class NavigationActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    /**************************路线相关*********************************/
     /**
-     * 定位地点
-     *
-     * @param amapLocation
+     * 选择路线
      */
-    @Override
-    public void onLocationChanged(AMapLocation amapLocation) {
-        if (mListener != null && amapLocation != null) {
-            EventBus.getDefault().post(amapLocation);
-            if (amapLocation != null
-                    && amapLocation.getErrorCode() == 0) {
-                if (startList.size() == 0)
-                    startList.add(new NaviLatLng(amapLocation.getLatitude(), amapLocation.getLongitude()));
-                if (!calculateSuccess) {
-                    mListener.onLocationChanged(amapLocation);// 显示系统小蓝点
-                }
+    public void changeRoute() {
+        if (!calculateSuccess) {
+            Toast.makeText(this, "请先算路", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        /**
+         * 计算出来的路径只有一条
+         */
+        if (routeOverlays.size() == 1) {
+            //必须告诉AMapNavi 你最后选择的哪条路
+            mAMapNavi.selectRouteId(routeOverlays.keyAt(0));
+            return;
+        }
 
-            } else {
-                String errText = "定位失败," + amapLocation.getErrorCode() + ": " + amapLocation.getErrorInfo();
-                Log.e("AmapErr", errText);
+        if (routeIndex >= routeOverlays.size())
+            routeIndex = 0;
+        //根据选中的路线下标值得到路线ID
+        int routeID = routeOverlays.keyAt(routeIndex);
+        //突出选择的那条路
+        for (int i = 0; i < routeOverlays.size(); i++) {
+            int key = routeOverlays.keyAt(i);
+            routeOverlays.get(key).setTransparency(0.4f);
+        }
+        routeOverlays.get(routeID).setTransparency(1);
+        /**把用户选择的那条路的权值弄高，使路线高亮显示的同时，重合路段不会变的透明**/
+        routeOverlays.get(routeID).setZindex(zindex++);
+
+        //必须告诉AMapNavi 你最后选择的哪条路
+        mAMapNavi.selectRouteId(routeID);
+        routeIndex++;
+
+    }
+
+    /**
+     * 绘制路线
+     *
+     * @param routeId
+     * @param path
+     */
+    private void drawRoutes(int routeId, AMapNaviPath path) {
+        calculateSuccess = true;
+        amap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(startList.get(0).getLatitude(), startList.get(0).getLongitude()), 12, 0, 0)));
+        RouteOverLay routeOverLay = new RouteOverLay(amap, path, this);
+        routeOverLay.setTrafficLine(false);
+        routeOverLay.setTrafficLightsVisible(false);
+        routeOverLay.addToMap();
+        routeOverlays.put(routeId, routeOverLay);
+    }
+
+    /**
+     * 清除当前地图上算好的路线
+     */
+    private void clearRoute() {
+        for (int i = 0; i < routeOverlays.size(); i++) {
+            RouteOverLay routeOverlay = routeOverlays.valueAt(i);
+            routeOverlay.removeFromMap();
+        }
+        routeOverlays.clear();
+        ways.clear();
+    }
+
+    /**
+     * 路线规划
+     */
+    private void planRoute() {
+        mRecyclerView.setVisibility(View.GONE);//多条路线规划结果
+        oneWay.setVisibility(View.GONE);//一条路线规划结果
+        if (startList.size() > 0 && endList.size() > 0) {
+            if (navigationType == 0) {//驾车
+//                try {
+//                    /**
+//                     * 方法:
+//                     *   int strategy=mAMapNavi.strategyConvert(congestion, avoidhightspeed, cost, hightspeed, multipleroute);
+//                     * 参数:
+//                     * @congestion 躲避拥堵
+//                     * @avoidhightspeed 不走高速
+//                     * @cost 避免收费
+//                     * @hightspeed 高速优先
+//                     * @multipleroute 多路径
+//                     *
+//                     * 说明:
+//                     *      以上参数都是boolean类型，其中multipleroute参数表示是否多条路线，如果为true则此策略会算出多条路线。
+//                     * 注意:
+//                     *      不走高速与高速优先不能同时为true
+//                     *      高速优先与避免收费不能同时为true
+//                     */
+//                    strategy = mAMapNavi.strategyConvert(true, false, false, true, true);
+//
+//                    LogUtils.debugInfo(TAG, "strategy========" + strategy);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+                mAMapNavi.calculateDriveRoute(startList, endList, wayList, PathPlanningStrategy.DRIVING_MULTIPLE_ROUTES_DEFAULT);
+            } else if (navigationType == 1) {//步行
+                mAMapNavi.calculateWalkRoute(startList.get(0), endList.get(0));
+            } else {//骑行
+                mAMapNavi.calculateRideRoute(startList.get(0), endList.get(0));
             }
         }
     }
 
     /**
-     * 激活定位
-     *
-     * @param listener
+     * 导航按钮点击事件实现方法
      */
-    @Override
-    public void activate(OnLocationChangedListener listener) {
-        mListener = listener;
-        if (mlocationClient == null) {
-            //初始化定位
-            mlocationClient = new AMapLocationClient(this);
-            //初始化定位参数
-            mLocationOption = new AMapLocationClientOption();
-            //设置定位回调监听
-            mlocationClient.setLocationListener(this);
-            //设置为高精度定位模式
-            mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
-//            mLocationOption.setOnceLocation(true);
-            //设置定位参数
-            mlocationClient.setLocationOption(mLocationOption);
-            // 此方法为每隔固定时间会发起一次定位请求，为了减少电量消耗或网络流量消耗，
-            // 注意设置合适的定位时间的间隔（最小间隔支持为2000ms），并且在合适时间调用stopLocation()方法来取消定位请求
-            // 在定位结束后，在合适的生命周期调用onDestroy()方法
-            // 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
-            mlocationClient.startLocation();//启动定位
-        }
-    }
-
-    /**
-     * 注销定位
-     */
-    @Override
-    public void deactivate() {
-        mListener = null;
-        if (mlocationClient != null) {
-            mlocationClient.stopLocation();
-            mlocationClient.onDestroy();
-        }
-        mlocationClient = null;
-    }
-
-    /**
-     * 方法必须重写
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mapview.onPause();
-        clearRoute();
-    }
-
-    /**
-     * 方法必须重写
-     */
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapview.onSaveInstanceState(outState);
-    }
-
-    /**
-     * 方法必须重写
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapview.onDestroy();
-        if (null != mlocationClient) {
-            mlocationClient.onDestroy();
-        }
-        EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        mAMapNavi.destroy();
-    }
-
-    /**
-     * ************************************************** 在算路页面，以下接口全不需要处理，在以后的版本中SDK会进行优化***********************************************************************************************
-     **/
-
-    @Override
-    public void onReCalculateRouteForYaw() {
-
-    }
-
-    @Override
-    public void onInitNaviSuccess() {
-        clearRoute();
-        planRoute();
-
-    }
-
-    @Override
-    public void onGetNavigationText(int i, String s) {
-
-    }
-
-
-    @Override
-    public void onInitNaviFailure() {
-
-    }
-
-
-    @Override
-    public void onStartNavi(int i) {
-
-    }
-
-    @Override
-    public void onTrafficStatusUpdate() {
-
-    }
-
-    @Override
-    public void onLocationChange(AMapNaviLocation aMapNaviLocation) {
-
-    }
-
-
-    @Override
-    public void onEndEmulatorNavi() {
-
-    }
-
-    @Override
-    public void onArriveDestination() {
-
-    }
-
-    @Override
-    public void onReCalculateRouteForTrafficJam() {
-
-    }
-
-    @Override
-    public void onArrivedWayPoint(int i) {
-
-    }
-
-    @Override
-    public void onGpsOpenStatus(boolean b) {
-
-    }
-
-    @Override
-    public void onNaviInfoUpdate(NaviInfo naviInfo) {
-
-    }
-
-    @Override
-    public void onNaviInfoUpdated(AMapNaviInfo aMapNaviInfo) {
-
-    }
-
-    @Override
-    public void updateCameraInfo(AMapNaviCameraInfo[] aMapNaviCameraInfos) {
-
-    }
-
-
-    @Override
-    public void onServiceAreaUpdate(AMapServiceAreaInfo[] aMapServiceAreaInfos) {
-
-    }
-
-    @Override
-    public void showCross(AMapNaviCross aMapNaviCross) {
-
-    }
-
-    @Override
-    public void hideCross() {
-
-    }
-
-
-    @Override
-    public void showLaneInfo(AMapLaneInfo[] aMapLaneInfos, byte[] bytes, byte[] bytes1) {
-
-    }
-
-
-    @Override
-    public void hideLaneInfo() {
-
-    }
-
-    @Override
-    public void onCalculateRouteSuccess(int[] ints) {
-//        if (ints.length == 1) {
-//            onCalculateRouteSuccessOld();
-//        } else {
-//            onCalculateMultipleRoutesSuccessOld(ints);
-//        }
-    }
-
-
-    @Override
-    public void notifyParallelRoad(int i) {
-
-    }
-
-    @Override
-    public void OnUpdateTrafficFacility(AMapNaviTrafficFacilityInfo aMapNaviTrafficFacilityInfo) {
-
-    }
-
-    @Override
-    public void OnUpdateTrafficFacility(AMapNaviTrafficFacilityInfo[] aMapNaviTrafficFacilityInfos) {
-
-    }
-
-    @Override
-    public void OnUpdateTrafficFacility(TrafficFacilityInfo trafficFacilityInfo) {
-
-    }
-
-    @Override
-    public void updateAimlessModeStatistics(AimLessModeStat aimLessModeStat) {
-
-    }
-
-    @Override
-    public void updateAimlessModeCongestionInfo(AimLessModeCongestionInfo aimLessModeCongestionInfo) {
-
-    }
-
-    @Override
-    public void onPlayRing(int i) {
-
-    }
-
-    @Override
-    public void onGetNavigationText(String s) {
-
-    }
-
-    @Override
-    public void updateIntervalCameraInfo(AMapNaviCameraInfo aMapNaviCameraInfo, AMapNaviCameraInfo aMapNaviCameraInfo1, int i) {
-
-    }
-
-    @Override
-    public void showModeCross(AMapModelCross aMapModelCross) {
-
-    }
-
-    @Override
-    public void hideModeCross() {
-
-    }
-
-    @Override
-    public void showLaneInfo(AMapLaneInfo aMapLaneInfo) {
-
-    }
-
-    @Override
-    public void onCalculateRouteSuccess(AMapCalcRouteResult aMapCalcRouteResult) {
-        if (aMapCalcRouteResult.getRouteid().length == 1) {
-            onCalculateRouteSuccessOld();
+    private void clickNavigation() {
+        if (startList.size() == 0) {
+            ArmsUtils.snackbarText("未获取到当前位置，不能导航");
+        } else if (endList.size() == 0) {
+            ArmsUtils.snackbarText("未获取到终点，不能导航");
         } else {
-            onCalculateMultipleRoutesSuccessOld(aMapCalcRouteResult.getRouteid());
+            if (!calculateSuccess) {
+                ArmsUtils.snackbarText("请先计算路线");
+                return;
+            } else {//实时导航
+                if (routeIndex > ways.size()) {
+                    routeIndex = 0;
+                }
+                mAMapNavi.selectRouteId(routeOverlays.keyAt(routeIndex));
+                Intent gpsintent = new Intent(this, BasicNaviActivity.class);
+                startActivity(gpsintent);
+
+            }
         }
     }
 
-    @Override
-    public void onCalculateRouteFailure(AMapCalcRouteResult aMapCalcRouteResult) {
-
+    /**
+     * 多条路线计算结果回调2
+     *
+     * @param ints
+     */
+//    @Override
+    private void onCalculateMultipleRoutesSuccessOld(int[] ints) {
+        //清空上次计算的路径列表。
+        routeOverlays.clear();
+        ways.clear();
+        HashMap<Integer, AMapNaviPath> paths = mAMapNavi.getNaviPaths();
+        for (int i = 0; i < ints.length; i++) {
+            AMapNaviPath path = paths.get(ints[i]);
+            if (path != null) {
+                drawRoutes(ints[i], path);
+                ways.add(path);
+            }
+        }
+        if (ways.size() > 0) {
+            currentPosition = 0;
+            lastPosition = -1;
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+            oneWay.setVisibility(View.GONE);
+            tvNavi.setText("开始导航");
+        } else if (ways.size() == 1) {
+            mRecyclerView.setVisibility(View.GONE);
+            oneWay.setVisibility(View.VISIBLE);
+            tvTime.setText(getTime(ways.get(0).getAllTime()));
+            tvLength.setText(getLength(ways.get(0).getAllLength()));
+            tvNavi.setText("开始导航");
+        } else {
+            mRecyclerView.setVisibility(View.GONE);
+            tvNavi.setText("准备导航");
+        }
+        changeRoute();
     }
 
-    @Override
-    public void onNaviRouteNotify(AMapNaviRouteNotifyData aMapNaviRouteNotifyData) {
-
+    /**
+     * 单条路线计算结果回调2
+     */
+//    @Override
+    private void onCalculateRouteSuccessOld() {
+        /**
+         * 清空上次计算的路径列表。
+         */
+        routeOverlays.clear();
+        ways.clear();
+        AMapNaviPath path = mAMapNavi.getNaviPath();
+        /**
+         * 单路径不需要进行路径选择，直接传入－1即可
+         */
+        drawRoutes(-1, path);
+        mRecyclerView.setVisibility(View.GONE);
+        oneWay.setVisibility(View.VISIBLE);
+        tvTime.setText(getTime(path.getAllTime()));
+        tvLength.setText(getLength(path.getAllLength()));
+        tvNavi.setText("开始导航");
     }
 }
