@@ -4,35 +4,50 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.Projection;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.navi.model.NaviLatLng;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
 import com.litesuits.orm.db.assit.QueryBuilder;
+import com.litesuits.orm.db.model.ColumnsValue;
+import com.litesuits.orm.db.model.ConflictAlgorithm;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
+import com.tcup.transformer.transnav.app.EventBusTags;
 import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerMainComponent;
 import com.tcup.transformer.transnav.map.overlay.WindowAdapter;
 import com.tcup.transformer.transnav.map.util.ORMUtil;
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
+
+import org.simple.eventbus.Subscriber;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,11 +75,24 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         AMap.OnInfoWindowClickListener {
     @BindView(R.id.map)
     MapView mMapView;
+    @BindView(R.id.nameMain)
+    TextView nameMain;
+    @BindView(R.id.typeMain)
+    TextView typeMain;
+    @BindView(R.id.lanlatMain)
+    TextView consumeNumMain;
+    @BindView(R.id.contentMain)
+    TextView lanLatMain;
+    @BindView(R.id.bottomMain)
+    LinearLayout bottomMain;
+    @BindView(R.id.bottomNav)
+    LinearLayout bottomNav;
     @Inject
     RxPermissions mRxPermissions;
     AMap aMap = null;
     private UiSettings mUiSettings;
     private MyLocationStyle myLocationStyle;
+
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -85,6 +113,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     public void initData(@Nullable Bundle savedInstanceState) {
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
+        bottomNav.setOnClickListener(this);
     }
 
     @Override
@@ -156,7 +185,20 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Override
     public void onClick(View v) {
-
+        switch (v.getId()) {
+            case R.id.bottomNav:
+                String[] re = lanLatMain.getText().toString().split(":");
+                String[] strings = re[1].split(",");
+                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
+                NaviLatLng endNav = new NaviLatLng(Double.valueOf(strings[1]), Double.valueOf(strings[0]));
+                Intent intent = new Intent(MainActivity.this, NavigationActivity.class);
+                intent.putExtra("startNav", startNav);
+                intent.putExtra("endNav", endNav);
+                ArmsUtils.startActivity(intent);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -166,6 +208,28 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
+        aMap.setMyLocationStyle(myLocationStyle);
+        String name = marker.getTitle();
+        if (name == null || "".equals(name)) {
+            return false;
+        }
+        jumpPoint(marker);
+        ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
+                .whereEquals("address", name).whereAppendOr().whereEquals("address", marker.getSnippet())
+        );
+        if (query == null || query.size() < 1) {
+            return false;
+        }
+        if (bottomMain.getVisibility() == View.GONE) {
+            bottomMain.setVisibility(View.VISIBLE);
+            bottomNav.setVisibility(View.VISIBLE);
+        }
+        nameMain.setText("变压器信息");
+        typeMain.setText("位置名称:" + query.get(0).getAddress());
+        lanLatMain.setText("经纬度信息:" + query.get(0).getLongitude() + "," + query.get(0).getLatitude());
+        consumeNumMain.setText("位置描述:" + query.get(0).getContent());
+        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(query.get(0).getLatitude(), query.get(0).getLongitude()), 17, 0, 0)));
         return false;
     }
 
@@ -186,6 +250,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         // marker 被拖动的marker对象。
         @Override
         public void onMarkerDragEnd(Marker arg0) {
+            String name = arg0.getTitle();
+            ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
+                    .whereEquals("address", name)
+            );
+            ColumnsValue cv = new ColumnsValue(new String[]{"latitude", "longitude"}, new Object[]{arg0.getPosition().latitude, arg0.getPosition().longitude});
+            ORMUtil.getLiteOrm(MainActivity.this).update(query.get(0), cv, ConflictAlgorithm.None);
         }
 
         // 在marker拖动过程中回调此方法, 这个marker的位置可以通过getPosition()方法返回。
@@ -204,6 +274,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
         if (aMap != null) {
             aMap.clear();
+        }
+        if (bottomMain.getVisibility() == View.VISIBLE) {
+            bottomMain.setVisibility(View.GONE);
+            bottomNav.setVisibility(View.GONE);
         }
         mMapView.onResume();
         initMark();
@@ -291,5 +365,44 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             aMap.setOnInfoWindowClickListener(this);
             aMap.setOnMarkerClickListener(this);
         }
+    }
+
+    @Subscriber(tag = EventBusTags.MARKINFO)
+    private void markInfo(MarketBean marketBean) {
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
+        aMap.setMyLocationStyle(myLocationStyle);
+        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(marketBean.getLatitude(), marketBean.getLongitude()), 17, 0, 0)));
+    }
+
+    /**
+     * marker点击时跳动一下
+     */
+    public void jumpPoint(final Marker marker) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = aMap.getProjection();
+        final LatLng markerLatlng = marker.getPosition();
+        Point markerPoint = proj.toScreenLocation(markerLatlng);
+        markerPoint.offset(0, -100);
+        final LatLng startLatLng = proj.fromScreenLocation(markerPoint);
+        final long duration = 1500;
+
+        final Interpolator interpolator = new BounceInterpolator();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * markerLatlng.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * markerLatlng.latitude + (1 - t)
+                        * startLatLng.latitude;
+                marker.setPosition(new LatLng(lat, lng));
+                if (t < 1.0) {
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 }

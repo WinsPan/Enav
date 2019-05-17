@@ -20,6 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".mvp.ui.activity.LocationListActivity"></activity>
+        <activity android:name=".mvp.ui.activity.NavigationActivity"></activity>
+        <activity android:name=".mvp.ui.activity.nav.ActNavActivity"></activity>
 
         <meta-data
             android:name="com.amap.api.v2.apikey"

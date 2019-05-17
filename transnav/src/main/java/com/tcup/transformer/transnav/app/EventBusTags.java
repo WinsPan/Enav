@@ -13,5 +13,7 @@ package com.tcup.transformer.transnav.app;
  * ================================================
  */
 public interface EventBusTags {
+    String KILLLIST = "kill_list";
+    String MARKINFO = "mark_info";
 
 }

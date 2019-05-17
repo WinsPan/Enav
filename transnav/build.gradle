@@ -94,5 +94,6 @@ dependencies {
 
 
     implementation rootProject.ext.dependencies["multidex"]
+    implementation rootProject.ext.dependencies["baseAdapter"]
     //test
 }

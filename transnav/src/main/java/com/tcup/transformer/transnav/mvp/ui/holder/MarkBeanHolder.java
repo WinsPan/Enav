@@ -26,7 +26,10 @@ import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.http.imageloader.ImageLoader;
 import com.jess.arms.utils.ArmsUtils;
 import com.tcup.transformer.transnav.R;
+import com.tcup.transformer.transnav.app.EventBusTags;
 import com.tcup.transformer.transnav.bean.MarketBean;
+
+import org.simple.eventbus.EventBus;
 
 import butterknife.BindView;
 
@@ -55,6 +58,13 @@ public class MarkBeanHolder extends BaseHolder<MarketBean> {
         super(itemView);
         //可以在任何可以拿到 Context 的地方, 拿到 AppComponent, 从而得到用 Dagger 管理的单例对象
         mAppComponent = ArmsUtils.obtainAppComponentFromContext(itemView.getContext());
+        itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                return false;
+            }
+        });
     }
 
     @Override
@@ -63,6 +73,13 @@ public class MarkBeanHolder extends BaseHolder<MarketBean> {
         mType.setText("位置名称：" + data.getAddress());
         mContent.setText("位置描述：" + data.getContent());
         mLanlat.setText("经纬度信息：" + data.getLongitude() + "," + data.getLatitude());
+
+        setOnItemClickListener(new OnViewClickListener() {
+            @Override
+            public void onViewClick(View view, int position) {
+                EventBus.getDefault().post(data, EventBusTags.KILLLIST);
+            }
+        });
     }
 
     /**

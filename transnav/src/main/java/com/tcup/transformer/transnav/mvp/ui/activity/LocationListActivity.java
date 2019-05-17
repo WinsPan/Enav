@@ -18,9 +18,14 @@ import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
+import com.tcup.transformer.transnav.app.EventBusTags;
+import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerLocationListComponent;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
 import com.tcup.transformer.transnav.mvp.presenter.LocationListPresenter;
+
+import org.simple.eventbus.EventBus;
+import org.simple.eventbus.Subscriber;
 
 import javax.inject.Inject;
 
@@ -53,8 +58,6 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     SwipeRefreshLayout mSwipeRefreshLayout;
     @Inject
     RxPermissions mRxPermissions;
-    @Inject
-    RecyclerView.LayoutManager mLayoutManager;
     @Inject
     RecyclerView.Adapter mAdapter;
 
@@ -172,6 +175,15 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
         switch (v.getId()) {
             case R.id.toolbar_back_head:
                 killMyself();
+                break;
+            default:
+                break;
         }
+    }
+
+    @Subscriber(tag = EventBusTags.KILLLIST)
+    private void markInfo(MarketBean marketBean) {
+        EventBus.getDefault().post(marketBean, EventBusTags.MARKINFO);
+        killMyself();
     }
 }
