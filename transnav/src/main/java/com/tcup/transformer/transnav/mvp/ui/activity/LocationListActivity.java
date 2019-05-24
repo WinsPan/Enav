@@ -16,12 +16,14 @@ import com.jess.arms.base.BaseActivity;
 import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
+import com.paginate.Paginate;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.app.EventBusTags;
 import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerLocationListComponent;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.LocationListPresenter;
 
 import org.simple.eventbus.EventBus;
@@ -57,11 +59,14 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout mSwipeRefreshLayout;
     @Inject
+    RecyclerView.LayoutManager mLayoutManager;
+    @Inject
     RxPermissions mRxPermissions;
     @Inject
     RecyclerView.Adapter mAdapter;
-
+    private Paginate mPaginate;
     private boolean isLoadingMore;
+
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -92,19 +97,17 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
      */
     private void initRecyclerView() {
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        ArmsUtils.configRecyclerView(mRecyclerView, new LinearLayoutManager(this));
+        ArmsUtils.configRecyclerView(mRecyclerView, mLayoutManager);
     }
 
 
     @Override
     public void showLoading() {
-        Timber.tag(TAG).w("showLoading");
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
     public void hideLoading() {
-        Timber.tag(TAG).w("hideLoading");
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
@@ -155,7 +158,12 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
      * 初始化Paginate,用于加载更多
      */
     private void initPaginate() {
-        mPresenter.requestMarks(false);
+        if (mPaginate == null) {
+            mPaginate = Paginate.with(mRecyclerView, callbacks)
+                    .setLoadingTriggerThreshold(0)
+                    .build();
+            mPaginate.setHasMoreDataToLoad(false);
+        }
     }
 
     @Override
@@ -182,8 +190,25 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     }
 
     @Subscriber(tag = EventBusTags.KILLLIST)
-    private void markInfo(MarketBean marketBean) {
+    private void markInfo(SiteListBean marketBean) {
         EventBus.getDefault().post(marketBean, EventBusTags.MARKINFO);
         killMyself();
     }
+
+    Paginate.Callbacks callbacks = new Paginate.Callbacks() {
+        @Override
+        public void onLoadMore() {
+            mPresenter.requestMarks(false);
+        }
+
+        @Override
+        public boolean isLoading() {
+            return isLoadingMore;
+        }
+
+        @Override
+        public boolean hasLoadedAllItems() {
+            return false;
+        }
+    };
 }

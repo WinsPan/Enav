@@ -2,14 +2,19 @@ package com.tcup.transformer.transnav.mvp.contract;
 
 import android.app.Activity;
 
-import com.jess.arms.mvp.IView;
 import com.jess.arms.mvp.IModel;
+import com.jess.arms.mvp.IView;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.bean.MarketBean;
+import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
+import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteParamBean;
 
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
+import retrofit2.http.QueryMap;
 
 
 /**
@@ -40,5 +45,9 @@ public interface LocationListContract {
     //Model层定义接口,外部只需关心Model返回的数据,无需关心内部细节,即是否使用缓存
     interface Model extends IModel {
         Observable<List<MarketBean>> getMarks(long lastIdQueried, boolean update);
+
+        Observable<BaseResponse<String>> addSite(SiteParamBean siteParamBean);
+
+        Observable<BaseResponse<ListPageBean>> searchSite(@QueryMap Map<String, Object> map);
     }
 }

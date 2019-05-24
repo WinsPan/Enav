@@ -15,6 +15,7 @@ import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.model.LocationListModel;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.ui.adapter.MarkBeanAdapter;
 
 import java.util.ArrayList;
@@ -48,18 +49,18 @@ public abstract class LocationListModule {
     @ActivityScope
     @Provides
     static RecyclerView.LayoutManager provideLayoutManager(LocationListContract.View view) {
-        return new GridLayoutManager(view.getActivity(), 2);
+        return new GridLayoutManager(view.getActivity(), 1);
     }
 
     @ActivityScope
     @Provides
-    static List<MarketBean> provideMarkBeanList() {
+    static List<SiteListBean> provideMarkBeanList() {
         return new ArrayList<>();
     }
 
     @ActivityScope
     @Provides
-    static RecyclerView.Adapter provideMarkBeanAdapter(List<MarketBean> list) {
+    static RecyclerView.Adapter provideMarkBeanAdapter(List<SiteListBean> list) {
         return new MarkBeanAdapter(list);
     }
 }

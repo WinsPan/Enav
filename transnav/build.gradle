@@ -91,7 +91,7 @@ dependencies {
     implementation rootProject.ext.dependencies["androideventbus"]
 //    implementation rootProject.ext.dependencies["eventbus"]
     implementation 'me.jessyan:arms-imageloader-glide:2.5.0'
-
+    implementation rootProject.ext.dependencies["paginate"]
 
     implementation rootProject.ext.dependencies["multidex"]
     implementation rootProject.ext.dependencies["baseAdapter"]

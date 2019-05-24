@@ -10,5 +10,5 @@ package com.tcup.transformer.transnav.mvp.model.api;
  * ================================================
  */
 public interface Api {
-    String APP_DOMAIN = "https://api.github.com";
+    String APP_DOMAIN = "http://47.102.199.66:9090";
 }

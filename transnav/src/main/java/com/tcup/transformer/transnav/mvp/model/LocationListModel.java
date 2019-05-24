@@ -5,28 +5,24 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.OnLifecycleEvent;
 
 import com.google.gson.Gson;
+import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.integration.IRepositoryManager;
 import com.jess.arms.mvp.BaseModel;
-
-import com.jess.arms.di.scope.ActivityScope;
-
-import javax.inject.Inject;
-
-import com.jess.arms.utils.ArmsUtils;
 import com.litesuits.orm.db.assit.QueryBuilder;
 import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.map.util.ORMUtil;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
-import com.tcup.transformer.transnav.mvp.ui.activity.MainActivity;
+import com.tcup.transformer.transnav.mvp.model.api.service.SiteService;
+import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
+import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteParamBean;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Function;
-import io.rx_cache2.DynamicKey;
-import io.rx_cache2.EvictDynamicKey;
 import timber.log.Timber;
 
 
@@ -60,6 +56,17 @@ public class LocationListModel extends BaseModel implements LocationListContract
         return Observable.just(ORMUtil.getLiteOrm(mApplication).query(new QueryBuilder<MarketBean>(MarketBean.class)
                 .appendOrderDescBy("createTime")));
 
+    }
+
+    @Override
+    public Observable<BaseResponse<String>> addSite(SiteParamBean siteParamBean) {
+        return mRepositoryManager.obtainRetrofitService(SiteService.class)
+                .addSite(siteParamBean);
+    }
+
+    @Override
+    public Observable<BaseResponse<ListPageBean>> searchSite(Map<String, Object> map) {
+        return mRepositoryManager.obtainRetrofitService(SiteService.class).searchSite(map);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)

@@ -23,11 +23,10 @@ import android.widget.TextView;
 import com.jess.arms.base.BaseHolder;
 import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.di.component.AppComponent;
-import com.jess.arms.http.imageloader.ImageLoader;
 import com.jess.arms.utils.ArmsUtils;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.app.EventBusTags;
-import com.tcup.transformer.transnav.bean.MarketBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 
 import org.simple.eventbus.EventBus;
 
@@ -42,7 +41,7 @@ import butterknife.BindView;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public class MarkBeanHolder extends BaseHolder<MarketBean> {
+public class MarkBeanHolder extends BaseHolder<SiteListBean> {
 
     @BindView(R.id.name)
     TextView mName;
@@ -68,11 +67,11 @@ public class MarkBeanHolder extends BaseHolder<MarketBean> {
     }
 
     @Override
-    public void setData(@NonNull MarketBean data, int position) {
+    public void setData(@NonNull SiteListBean data, int position) {
         mName.setText("变压器信息");
-        mType.setText("位置名称：" + data.getAddress());
-        mContent.setText("位置描述：" + data.getContent());
-        mLanlat.setText("经纬度信息：" + data.getLongitude() + "," + data.getLatitude());
+        mType.setText("位置名称：" + data.getSiteName());
+        mContent.setText("位置描述：" + data.getSiteAddr());
+        mLanlat.setText("经纬度信息：" + data.getSiteLng() + "," + data.getSiteLat());
 
         setOnItemClickListener(new OnViewClickListener() {
             @Override

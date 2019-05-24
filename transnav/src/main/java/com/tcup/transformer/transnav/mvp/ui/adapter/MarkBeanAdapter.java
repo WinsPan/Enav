@@ -22,6 +22,8 @@ import com.jess.arms.base.BaseHolder;
 import com.jess.arms.base.DefaultAdapter;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.bean.MarketBean;
+import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.ui.holder.MarkBeanHolder;
 
 import java.util.List;
@@ -36,15 +38,15 @@ import java.util.List;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public class MarkBeanAdapter extends DefaultAdapter<MarketBean> {
+public class MarkBeanAdapter extends DefaultAdapter<SiteListBean> {
 
-    public MarkBeanAdapter(List<MarketBean> infos) {
+    public MarkBeanAdapter(List<SiteListBean> infos) {
         super(infos);
     }
 
     @NonNull
     @Override
-    public BaseHolder<MarketBean> getHolder(@NonNull View v, int viewType) {
+    public BaseHolder<SiteListBean> getHolder(@NonNull View v, int viewType) {
         return new MarkBeanHolder(v);
     }
 
