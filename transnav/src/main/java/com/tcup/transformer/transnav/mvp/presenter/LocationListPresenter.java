@@ -140,9 +140,7 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
                         preEndIndex = siteListBeans.size();//更新之前列表总长度,用于确定加载更多的起始位置
                         siteListBeans.addAll(baseResponse.getData().getList());
                         if (baseResponse.getData().isHasNextPage()) {
-                            LogUtils.debugInfo(TAG, "=======mPage=====" + mPage);
                             mPage = baseResponse.getData().getNextPage();
-                            LogUtils.debugInfo(TAG, "=======mPage=====" + mPage);
                         }
                         isLastPage = baseResponse.getData().isLastPage();
                         if (pullToRefresh) {

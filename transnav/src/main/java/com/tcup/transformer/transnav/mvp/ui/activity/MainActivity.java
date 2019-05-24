@@ -314,7 +314,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
                 Toast.makeText(this, "Add Contact option menu clicked!", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_luru:
-                Toast.makeText(this, "About Us option menu clicked!", Toast.LENGTH_SHORT).show();
+                ArmsUtils.startActivity(new Intent(MainActivity.this, PickLocationActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
