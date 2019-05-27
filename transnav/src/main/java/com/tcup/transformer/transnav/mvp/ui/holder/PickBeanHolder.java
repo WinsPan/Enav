@@ -41,7 +41,7 @@ import butterknife.BindView;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public class MarkBeanHolder extends BaseHolder<SiteListBean> {
+public class PickBeanHolder extends BaseHolder<SiteListBean> {
 
     @BindView(R.id.name)
     TextView mName;
@@ -53,7 +53,7 @@ public class MarkBeanHolder extends BaseHolder<SiteListBean> {
     TextView mLanlat;
     private AppComponent mAppComponent;
 
-    public MarkBeanHolder(View itemView) {
+    public PickBeanHolder(View itemView) {
         super(itemView);
         //可以在任何可以拿到 Context 的地方, 拿到 AppComponent, 从而得到用 Dagger 管理的单例对象
         mAppComponent = ArmsUtils.obtainAppComponentFromContext(itemView.getContext());

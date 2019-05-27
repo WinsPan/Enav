@@ -7,14 +7,23 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.SupportActivity;
 import android.support.v7.widget.RecyclerView;
 
-import com.jess.arms.di.scope.ActivityScope;
-import com.jess.arms.http.imageloader.ImageLoader;
 import com.jess.arms.integration.AppManager;
+import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.mvp.BasePresenter;
+import com.jess.arms.http.imageloader.ImageLoader;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import me.jessyan.rxerrorhandler.core.RxErrorHandler;
+import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
+import me.jessyan.rxerrorhandler.handler.RetryWithDelay;
+
+import javax.inject.Inject;
+
 import com.jess.arms.utils.ArmsUtils;
 import com.jess.arms.utils.PermissionUtil;
 import com.jess.arms.utils.RxLifecycleUtils;
-import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
+import com.tcup.transformer.transnav.mvp.contract.PickListContract;
 import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
 import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
 import com.tcup.transformer.transnav.mvp.model.entity.QueryParam;
@@ -24,20 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import me.jessyan.rxerrorhandler.core.RxErrorHandler;
-import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
-import me.jessyan.rxerrorhandler.handler.RetryWithDelay;
-
 
 /**
  * ================================================
  * Description:
  * <p>
- * Created by MVPArmsTemplate on 05/13/2019 09:26
+ * Created by MVPArmsTemplate on 05/27/2019 10:30
  * <a href="mailto:jess.yan.effort@gmail.com">Contact me</a>
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * <a href="https://github.com/JessYanCoding/MVPArms">Star me</a>
@@ -46,7 +47,7 @@ import me.jessyan.rxerrorhandler.handler.RetryWithDelay;
  * ================================================
  */
 @ActivityScope
-public class LocationListPresenter extends BasePresenter<LocationListContract.Model, LocationListContract.View> {
+public class PickListPresenter extends BasePresenter<PickListContract.Model, PickListContract.View> {
     @Inject
     RxErrorHandler mErrorHandler;
     @Inject
@@ -63,10 +64,10 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
     private boolean isFirst = true;
     private int preEndIndex;
     private int mPage = 1;
-    private boolean isLastPage = false;
+    private boolean isHasNextPage = true;
 
     @Inject
-    public LocationListPresenter(LocationListContract.Model model, LocationListContract.View rootView) {
+    public PickListPresenter(PickListContract.Model model, PickListContract.View rootView) {
         super(model, rootView);
     }
 
@@ -76,7 +77,7 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     void onCreate() {
-        requestMarks(true);//打开 App 时自动加载列表
+        requestMarks(true, "");//打开 App 时自动加载列表
     }
 
     public int getmPage() {
@@ -84,15 +85,19 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
     }
 
     public boolean isLastPage() {
-        return isLastPage;
+        return isHasNextPage;
     }
 
-    public void requestMarks(final boolean pullToRefresh) {
+    public void setLastPage(boolean lastPage) {
+        isHasNextPage = lastPage;
+    }
+
+    public void requestMarks(final boolean pullToRefresh, String siteName) {
         //请求外部存储权限用于适配android6.0的权限管理机制
         PermissionUtil.externalStorage(new PermissionUtil.RequestPermission() {
             @Override
             public void onRequestPermissionSuccess() {
-                requestFromModel(pullToRefresh);
+                requestFromModel(pullToRefresh, siteName);
             }
 
             @Override
@@ -109,17 +114,20 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
         }, mRootView.getRxPermissions(), mErrorHandler);
     }
 
-    private void requestFromModel(boolean pullToRefresh) {
+    private void requestFromModel(boolean pullToRefresh, String siteName) {
         if (pullToRefresh) {
             mPage = 1;
         }//下拉刷新默认只请求第一页
-        if (isLastPage) {
+        if (mPage == -1) {
             ArmsUtils.snackbarText("没有更多数据了");
+            mRootView.hideLoading();//隐藏下拉刷新的进度条
+            mRootView.endLoadMore();//隐藏上拉加载更多的进度条
             return;
         }
         QueryParam queryParam = new QueryParam();
         queryParam.setPageIndex(mPage);
         Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("siteName", siteName);
         paramMap.put("pageIndex", mPage);
         paramMap.put("userAccount", queryParam.getUserAccount());
         paramMap.put("token", queryParam.getToken());
@@ -149,10 +157,12 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
                         }
                         preEndIndex = siteListBeans.size();//更新之前列表总长度,用于确定加载更多的起始位置
                         siteListBeans.addAll(baseResponse.getData().getList());
-                        if (baseResponse.getData().isHasNextPage()) {
+                        isHasNextPage = baseResponse.getData().isHasNextPage();
+                        if (isHasNextPage) {
                             mPage = baseResponse.getData().getNextPage();
+                        } else {
+                            mPage = -1;
                         }
-                        isLastPage = baseResponse.getData().isLastPage();
                         if (pullToRefresh) {
                             mAdapter.notifyDataSetChanged();
                         } else {
@@ -165,10 +175,9 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.mAdapter = null;
-//        this.mMarkBean = null;
         this.mErrorHandler = null;
         this.mAppManager = null;
+        this.mImageLoader = null;
         this.mApplication = null;
     }
 }

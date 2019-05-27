@@ -45,6 +45,7 @@ import com.tcup.transformer.transnav.di.component.DaggerMainComponent;
 import com.tcup.transformer.transnav.map.overlay.WindowAdapter;
 import com.tcup.transformer.transnav.map.util.ORMUtil;
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
 
 import org.simple.eventbus.Subscriber;
@@ -280,7 +281,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             bottomNav.setVisibility(View.GONE);
         }
         mMapView.onResume();
-        initMark();
+//        initMark();
     }
 
     @Override
@@ -314,7 +315,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
                 Toast.makeText(this, "Add Contact option menu clicked!", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_luru:
-                ArmsUtils.startActivity(new Intent(MainActivity.this, PickLocationActivity.class));
+                ArmsUtils.startActivity(new Intent(MainActivity.this, PickListActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -368,10 +369,30 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     }
 
     @Subscriber(tag = EventBusTags.MARKINFO)
-    private void markInfo(MarketBean marketBean) {
-        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
-        aMap.setMyLocationStyle(myLocationStyle);
-        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(marketBean.getLatitude(), marketBean.getLongitude()), 17, 0, 0)));
+    private void markInfo(SiteListBean marketBean) {
+        if (marketBean.getSiteLat() != null && marketBean.getSiteLng() != null) {
+            myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
+            aMap.setMyLocationStyle(myLocationStyle);
+            if (aMap == null) {
+                aMap = mMapView.getMap();
+                mUiSettings = aMap.getUiSettings();
+            }
+            aMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(Double.valueOf(marketBean.getSiteLat()),//设置纬度
+                            Double.valueOf(marketBean.getSiteLng())))//设置经度
+                    .title(marketBean.getSiteAddr())//设置标题
+                    .snippet(marketBean.getSiteRemark())//设置内容
+                    .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
+                    .draggable(true) //设置Marker可拖动
+                    .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                            .decodeResource(getResources(), R.drawable.flag))));
+            //设置自定义弹窗
+            aMap.setInfoWindowAdapter(new WindowAdapter(this));
+            //绑定信息窗点击事件
+            aMap.setOnInfoWindowClickListener(this);
+            aMap.setOnMarkerClickListener(this);
+            aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(marketBean.getSiteLat()), Double.valueOf(marketBean.getSiteLng())), 13, 0, 0)));
+        }
     }
 
     /**
