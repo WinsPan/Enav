@@ -76,7 +76,7 @@ public class PickBeanHolder extends BaseHolder<SiteListBean> {
         setOnItemClickListener(new OnViewClickListener() {
             @Override
             public void onViewClick(View view, int position) {
-                EventBus.getDefault().post(data, EventBusTags.KILLLIST);
+                EventBus.getDefault().post(data, EventBusTags.EDITMARKINFO);
             }
         });
     }

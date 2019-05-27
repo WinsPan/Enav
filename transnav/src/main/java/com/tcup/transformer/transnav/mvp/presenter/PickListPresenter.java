@@ -120,9 +120,6 @@ public class PickListPresenter extends BasePresenter<PickListContract.Model, Pic
         }//下拉刷新默认只请求第一页
         if (mPage == -1) {
             ArmsUtils.snackbarText("没有更多数据了");
-            mRootView.hideLoading();//隐藏下拉刷新的进度条
-            mRootView.endLoadMore();//隐藏上拉加载更多的进度条
-            return;
         }
         QueryParam queryParam = new QueryParam();
         queryParam.setPageIndex(mPage);
@@ -152,21 +149,25 @@ public class PickListPresenter extends BasePresenter<PickListContract.Model, Pic
                 .subscribe(new ErrorHandleSubscriber<BaseResponse<ListPageBean>>(mErrorHandler) {
                     @Override
                     public void onNext(BaseResponse<ListPageBean> baseResponse) {
-                        if (pullToRefresh) {
-                            siteListBeans.clear();//如果是下拉刷新则清空列表
-                        }
-                        preEndIndex = siteListBeans.size();//更新之前列表总长度,用于确定加载更多的起始位置
-                        siteListBeans.addAll(baseResponse.getData().getList());
-                        isHasNextPage = baseResponse.getData().isHasNextPage();
-                        if (isHasNextPage) {
-                            mPage = baseResponse.getData().getNextPage();
-                        } else {
-                            mPage = -1;
-                        }
-                        if (pullToRefresh) {
-                            mAdapter.notifyDataSetChanged();
-                        } else {
-                            mAdapter.notifyItemRangeInserted(preEndIndex, baseResponse.getData().getList().size());
+                        if (baseResponse.getStatus() > -1) {
+                            if (pullToRefresh) {
+                                siteListBeans.clear();//如果是下拉刷新则清空列表
+                            }
+                            preEndIndex = siteListBeans.size();//更新之前列表总长度,用于确定加载更多的起始位置
+                            siteListBeans.addAll(baseResponse.getData().getList());
+                            isHasNextPage = baseResponse.getData().isHasNextPage();
+                            if (isHasNextPage) {
+                                mPage = baseResponse.getData().getNextPage();
+                            } else {
+                                mPage = -1;
+                            }
+                            if (pullToRefresh) {
+                                mAdapter.notifyDataSetChanged();
+                            } else {
+                                mAdapter.notifyItemRangeInserted(preEndIndex, baseResponse.getData().getList().size());
+                            }
+                        } else if (mPage != -1) {
+                            ArmsUtils.snackbarText(baseResponse.getMessage());
                         }
                     }
                 });

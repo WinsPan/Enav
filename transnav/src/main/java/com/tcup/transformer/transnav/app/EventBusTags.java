@@ -15,5 +15,6 @@ package com.tcup.transformer.transnav.app;
 public interface EventBusTags {
     String KILLLIST = "kill_list";
     String MARKINFO = "mark_info";
-
+    String EDITMARKINFO = "edit_mark_info";
+    String EDITMARKINFOCHOOSE = "edit_mark_info_choose";
 }

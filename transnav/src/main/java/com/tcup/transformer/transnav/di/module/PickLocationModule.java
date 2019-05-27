@@ -1,11 +1,15 @@
 package com.tcup.transformer.transnav.di.module;
 
+import android.support.v4.app.FragmentActivity;
+
 import com.jess.arms.di.scope.ActivityScope;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.contract.PickLocationContract;
 import com.tcup.transformer.transnav.mvp.model.PickLocationModel;
 
@@ -27,4 +31,10 @@ public abstract class PickLocationModule {
 
     @Binds
     abstract PickLocationContract.Model bindPickLocationModel(PickLocationModel model);
+
+    @ActivityScope
+    @Provides
+    static RxPermissions provideRxPermissions(PickLocationContract.View view) {
+        return new RxPermissions((FragmentActivity) view.getActivity());
+    }
 }

@@ -88,7 +88,7 @@ public class PickListActivity extends BaseActivity<PickListPresenter> implements
     public void initData(@Nullable Bundle savedInstanceState) {
         mTitle.setText("站点列表");
         mSearchView.setOnQueryTextListener(this);
-        mBack.setOnClickListener(this::onClick);
+        mBack.setOnClickListener(this);
         initRecyclerView();
         mRecyclerView.setAdapter(mAdapter);
         initPaginate();
@@ -216,10 +216,10 @@ public class PickListActivity extends BaseActivity<PickListPresenter> implements
         }
     };
 
-    @Subscriber(tag = EventBusTags.KILLLIST)
-    private void markInfo(SiteListBean marketBean) {
-        if (marketBean.getSiteLat() != null && marketBean.getSiteLng() != null) {
-            EventBus.getDefault().post(marketBean, EventBusTags.MARKINFO);
-        }
+    @Subscriber(tag = EventBusTags.EDITMARKINFO)
+    private void markInfo(SiteListBean siteListBean) {
+        Intent intent = new Intent(PickListActivity.this, PickLocationActivity.class);
+        intent.putExtra("marketBean", siteListBean);
+        launchActivity(intent);
     }
 }
