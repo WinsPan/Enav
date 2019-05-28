@@ -28,7 +28,7 @@ import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.app.EventBusTags;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 
-import org.simple.eventbus.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 
@@ -76,7 +76,7 @@ public class MarkBeanHolder extends BaseHolder<SiteListBean> {
         setOnItemClickListener(new OnViewClickListener() {
             @Override
             public void onViewClick(View view, int position) {
-                EventBus.getDefault().post(data, EventBusTags.KILLLIST);
+                EventBus.getDefault().postSticky(data);
             }
         });
     }

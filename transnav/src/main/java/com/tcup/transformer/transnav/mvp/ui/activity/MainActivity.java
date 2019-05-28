@@ -48,7 +48,8 @@ import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
 
-import org.simple.eventbus.Subscriber;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,6 +94,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     AMap aMap = null;
     private UiSettings mUiSettings;
     private MyLocationStyle myLocationStyle;
+    private SiteListBean siteListBean;
 
 
     @Override
@@ -216,10 +218,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             return false;
         }
         jumpPoint(marker);
-        ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
-                .whereEquals("address", name).whereAppendOr().whereEquals("address", marker.getSnippet())
-        );
-        if (query == null || query.size() < 1) {
+        if (!marker.getTitle().equals(siteListBean.getSiteAddr()) || siteListBean.getSiteLat() == null) {
             return false;
         }
         if (bottomMain.getVisibility() == View.GONE) {
@@ -227,10 +226,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             bottomNav.setVisibility(View.VISIBLE);
         }
         nameMain.setText("变压器信息");
-        typeMain.setText("位置名称:" + query.get(0).getAddress());
-        lanLatMain.setText("经纬度信息:" + query.get(0).getLongitude() + "," + query.get(0).getLatitude());
-        consumeNumMain.setText("位置描述:" + query.get(0).getContent());
-        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(query.get(0).getLatitude(), query.get(0).getLongitude()), 17, 0, 0)));
+        typeMain.setText("位置名称:" + siteListBean.getSiteAddr());
+        lanLatMain.setText("经纬度信息:" + siteListBean.getSiteLng() + "," + siteListBean.getSiteLat());
+        consumeNumMain.setText("位置描述:" + siteListBean.getSiteRemark());
+        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListBean.getSiteLat()), Double.valueOf(siteListBean.getSiteLng())), 17, 0, 0)));
         return false;
     }
 
@@ -273,9 +272,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     protected void onResume() {
         super.onResume();
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
-        if (aMap != null) {
-            aMap.clear();
-        }
+//        if (aMap != null) {
+//            aMap.clear();
+//        }
         if (bottomMain.getVisibility() == View.VISIBLE) {
             bottomMain.setVisibility(View.GONE);
             bottomNav.setVisibility(View.GONE);
@@ -368,20 +367,23 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         }
     }
 
-    @Subscriber(tag = EventBusTags.MARKINFO)
-    private void markInfo(SiteListBean marketBean) {
-        if (marketBean.getSiteLat() != null && marketBean.getSiteLng() != null) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSiteListBean(SiteListBean siteListBean) {
+        this.siteListBean = siteListBean;
+        if (siteListBean.getSiteLat() != null && siteListBean.getSiteLng() != null) {
             myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
             aMap.setMyLocationStyle(myLocationStyle);
             if (aMap == null) {
                 aMap = mMapView.getMap();
                 mUiSettings = aMap.getUiSettings();
+                aMap.clear();
             }
+            aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListBean.getSiteLat()), Double.valueOf(siteListBean.getSiteLng())), 13, 0, 0)));
             aMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(Double.valueOf(marketBean.getSiteLat()),//设置纬度
-                            Double.valueOf(marketBean.getSiteLng())))//设置经度
-                    .title(marketBean.getSiteAddr())//设置标题
-                    .snippet(marketBean.getSiteRemark())//设置内容
+                    .position(new LatLng(Double.valueOf(siteListBean.getSiteLat()),//设置纬度
+                            Double.valueOf(siteListBean.getSiteLng())))//设置经度
+                    .title(siteListBean.getSiteAddr())//设置标题
+//                    .snippet(marketBean.getSiteRemark())//设置内容
                     .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
                     .draggable(true) //设置Marker可拖动
                     .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
@@ -391,7 +393,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             //绑定信息窗点击事件
             aMap.setOnInfoWindowClickListener(this);
             aMap.setOnMarkerClickListener(this);
-            aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(marketBean.getSiteLat()), Double.valueOf(marketBean.getSiteLng())), 13, 0, 0)));
         }
     }
 

@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -19,20 +18,17 @@ import com.jess.arms.utils.ArmsUtils;
 import com.paginate.Paginate;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
-import com.tcup.transformer.transnav.app.EventBusTags;
-import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerLocationListComponent;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.LocationListPresenter;
 
-import org.simple.eventbus.EventBus;
-import org.simple.eventbus.Subscriber;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import timber.log.Timber;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
 
@@ -189,10 +185,9 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
         }
     }
 
-    @Subscriber(tag = EventBusTags.KILLLIST)
-    private void markInfo(SiteListBean marketBean) {
-        if (marketBean.getSiteLat() != null && marketBean.getSiteLng() != null) {
-            EventBus.getDefault().post(marketBean, EventBusTags.MARKINFO);
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSiteListBean(SiteListBean siteListBean) {
+        if (siteListBean.getSiteLat() != null && siteListBean.getSiteLng() != null) {
             killMyself();
         }
     }

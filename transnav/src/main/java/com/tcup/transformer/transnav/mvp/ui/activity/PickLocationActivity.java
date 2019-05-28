@@ -19,25 +19,16 @@ import com.amap.api.maps.model.MyLocationStyle;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
-
-import com.litesuits.orm.db.assit.QueryBuilder;
-import com.litesuits.orm.db.model.ColumnsValue;
-import com.litesuits.orm.db.model.ConflictAlgorithm;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.app.EventBusTags;
-import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerPickLocationComponent;
-import com.tcup.transformer.transnav.map.util.ORMUtil;
 import com.tcup.transformer.transnav.mvp.contract.PickLocationContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.PickLocationPresenter;
 
-import com.tcup.transformer.transnav.R;
-
-
-import org.simple.eventbus.Subscriber;
-
-import java.util.ArrayList;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
@@ -132,9 +123,9 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         }
     }
 
-    @Subscriber(tag = EventBusTags.EDITMARKINFOCHOOSE)
-    private void markInfo(SiteListBean marketBean) {
-        ArmsUtils.snackbarText("111111111" + marketBean.getSiteAddr());
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void onSiteListBean(SiteListBean siteListBean) {
+        ArmsUtils.snackbarText("111111111" + siteListBean.getSiteAddr());
     }
 
     @Override

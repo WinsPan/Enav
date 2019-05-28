@@ -25,8 +25,9 @@ import com.tcup.transformer.transnav.mvp.contract.PickListContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.PickListPresenter;
 
-import org.simple.eventbus.EventBus;
-import org.simple.eventbus.Subscriber;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
@@ -216,10 +217,10 @@ public class PickListActivity extends BaseActivity<PickListPresenter> implements
         }
     };
 
-    @Subscriber(tag = EventBusTags.EDITMARKINFO)
-    private void markInfo(SiteListBean siteListBean) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSiteListBean(SiteListBean siteListBean) {
         Intent intent = new Intent(PickListActivity.this, PickLocationActivity.class);
-        intent.putExtra("marketBean", siteListBean);
+//        intent.putExtra("marketBean", siteListBean);
         launchActivity(intent);
     }
 }
