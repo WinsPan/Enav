@@ -10,15 +10,27 @@ import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.mvp.BasePresenter;
 import com.jess.arms.http.imageloader.ImageLoader;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
+import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
+import me.jessyan.rxerrorhandler.handler.RetryWithDelay;
 
 import javax.inject.Inject;
 
+import com.jess.arms.utils.ArmsUtils;
 import com.jess.arms.utils.PermissionUtil;
+import com.jess.arms.utils.RxLifecycleUtils;
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.contract.PickLocationContract;
+import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
+import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteParamBean;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -82,6 +94,44 @@ public class PickLocationPresenter extends BasePresenter<PickLocationContract.Mo
                 mRootView.showMessage("需要到设置界面进行授权");
             }
         }, mRootView.getRxPermissions(), mErrorHandler, pemissions);
+    }
+
+    public void editSite(SiteListBean siteListBean) {
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+//        SiteParamBean siteParamBean = new SiteParamBean();
+//        siteParamBean.setId(siteListBean.getId());
+        paramMap.put("id", siteListBean.getId());
+//        siteParamBean.setAreaId(siteListBean.getEqpAreaDomain().getId());
+//        siteParamBean.setCreateUserId(siteListBean.getCreateUser().getId());
+//        siteParamBean.setOperateUserId(siteListBean.getOperateUser().getId());
+//        siteParamBean.setSiteAddr(siteListBean.getSiteAddr());
+//        siteParamBean.setSiteDate(siteListBean.getSiteDate());
+//        siteParamBean.setSiteLat(siteListBean.getSiteLat());
+//        siteParamBean.setSiteLng(siteListBean.getSiteLng());
+        paramMap.put("siteLat", siteListBean.getSiteLat());
+        paramMap.put("siteLng", siteListBean.getSiteLng());
+        paramMap.put("userAccount", "appAccount");
+        paramMap.put("token", "df6bc488b3c6f3a2140f316c923462e5");
+//        siteParamBean.setSiteName(siteListBean.getSiteName());
+//        siteParamBean.setSiteNo(siteListBean.getSiteNo());
+//        siteParamBean.setSiteRemark(siteListBean.getSiteRemark());
+//        siteParamBean.setSiteStatus(siteListBean.getSiteStatus());
+//        siteParamBean.setTypeId(siteListBean.getEqpTypeDomain().getId());
+        mModel.editSite(paramMap).subscribeOn(Schedulers.io())
+                .retryWhen(new RetryWithDelay(3, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
+                .subscribe(new ErrorHandleSubscriber<BaseResponse<String>>(mErrorHandler) {
+                    @Override
+                    public void onNext(BaseResponse<String> baseResponse) {
+                        if (baseResponse.getStatus() > -1) {
+                            ArmsUtils.snackbarText("位置信息更新成功");
+                        } else {
+                            ArmsUtils.snackbarText(baseResponse.getMessage());
+                        }
+                    }
+                });
     }
 
     @Override

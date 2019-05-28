@@ -223,4 +223,10 @@ public class PickListActivity extends BaseActivity<PickListPresenter> implements
 //        intent.putExtra("marketBean", siteListBean);
         launchActivity(intent);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresenter.requestMarks(true, siteName);
+    }
 }

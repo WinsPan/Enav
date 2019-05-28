@@ -2,7 +2,9 @@ package com.tcup.transformer.transnav.mvp.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +16,11 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
+import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
@@ -23,6 +29,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.app.EventBusTags;
 import com.tcup.transformer.transnav.di.component.DaggerPickLocationComponent;
+import com.tcup.transformer.transnav.map.overlay.WindowAdapter;
 import com.tcup.transformer.transnav.mvp.contract.PickLocationContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.PickLocationPresenter;
@@ -49,7 +56,8 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * <a href="https://github.com/JessYanCoding/MVPArmsTemplate">模版请保持更新</a>
  * ================================================
  */
-public class PickLocationActivity extends BaseActivity<PickLocationPresenter> implements PickLocationContract.View, View.OnClickListener {
+public class PickLocationActivity extends BaseActivity<PickLocationPresenter> implements PickLocationContract.View, View.OnClickListener, AMap.OnMarkerClickListener,
+        AMap.OnInfoWindowClickListener, AMap.OnMyLocationChangeListener {
     @BindView(R.id.toolbar_title_head)
     TextView mTitle;
     @BindView(R.id.toolbar_back_head)
@@ -61,6 +69,7 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
     private UiSettings mUiSettings;
     private MyLocationStyle myLocationStyle;
     AMap aMap = null;
+    private SiteListBean siteListBean;
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -79,10 +88,9 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
 
     @Override
     public void initData(@Nullable Bundle savedInstanceState) {
-        mTitle.setText("地图选点");
         mMapView.onCreate(savedInstanceState);
+        mTitle.setText("地图选点");
         mBack.setOnClickListener(this);
-        Intent intent = getIntent();
     }
 
     @Override
@@ -125,7 +133,33 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onSiteListBean(SiteListBean siteListBean) {
-        ArmsUtils.snackbarText("111111111" + siteListBean.getSiteAddr());
+        this.siteListBean = siteListBean;
+    }
+
+    public void addMark(Location location) {
+        double lat;
+        double lon;
+        if (siteListBean != null && siteListBean.getSiteLat() != null && siteListBean.getSiteLng() != null) {
+            lat = Double.valueOf(siteListBean.getSiteLat());
+            lon = Double.valueOf(siteListBean.getSiteLng());
+        } else {
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+        }
+        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(lat, lon), 17, 0, 0)));
+        aMap.addMarker(new MarkerOptions()
+                .position(new LatLng(lat, lon))//设置经度
+                .title(siteListBean.getSiteAddr())//设置标题
+//                    .snippet(marketBean.getSiteRemark())//设置内容
+                .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
+                .draggable(true) //设置Marker可拖动
+                .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                        .decodeResource(getResources(), R.drawable.flag))));
+        //设置自定义弹窗
+        aMap.setInfoWindowAdapter(new WindowAdapter(this));
+        //绑定信息窗点击事件
+        aMap.setOnInfoWindowClickListener(this);
+        aMap.setOnMarkerClickListener(this);
     }
 
     @Override
@@ -153,6 +187,7 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
         // 绑定marker拖拽事件
         aMap.setOnMarkerDragListener(markerDragListener);
+        aMap.setOnMyLocationChangeListener(this);
         mUiSettings.setScaleControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);
         aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
@@ -175,6 +210,9 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         // marker 被拖动的marker对象。
         @Override
         public void onMarkerDragEnd(Marker arg0) {
+            siteListBean.setSiteLat(String.valueOf(arg0.getPosition().latitude));
+            siteListBean.setSiteLng(String.valueOf(arg0.getPosition().longitude));
+            mPresenter.editSite(siteListBean);
         }
 
         // 在marker拖动过程中回调此方法, 这个marker的位置可以通过getPosition()方法返回。
@@ -191,9 +229,6 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
     protected void onResume() {
         super.onResume();
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
-        if (aMap != null) {
-            aMap.clear();
-        }
         mMapView.onResume();
 //        initMark();
     }
@@ -219,5 +254,23 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         if (mMapView != null) {
             mMapView.onDestroy();
         }
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        siteListBean.setSiteLat(String.valueOf(marker.getPosition().latitude));
+        siteListBean.setSiteLng(String.valueOf(marker.getPosition().longitude));
+        mPresenter.editSite(siteListBean);
+        return false;
+    }
+
+    @Override
+    public void onMyLocationChange(Location location) {
+        addMark(location);
     }
 }

@@ -11,6 +11,13 @@ import com.jess.arms.di.scope.ActivityScope;
 import javax.inject.Inject;
 
 import com.tcup.transformer.transnav.mvp.contract.PickLocationContract;
+import com.tcup.transformer.transnav.mvp.model.api.service.SiteService;
+import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteParamBean;
+
+import java.util.Map;
+
+import io.reactivex.Observable;
 
 
 /**
@@ -35,6 +42,11 @@ public class PickLocationModel extends BaseModel implements PickLocationContract
     @Inject
     public PickLocationModel(IRepositoryManager repositoryManager) {
         super(repositoryManager);
+    }
+
+    @Override
+    public Observable<BaseResponse<String>> editSite(Map<String, Object> map) {
+        return mRepositoryManager.obtainRetrofitService(SiteService.class).editSite(map);
     }
 
     @Override

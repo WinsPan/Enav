@@ -1,6 +1,8 @@
 package com.tcup.transformer.transnav.mvp.model.entity;
 
 public class SiteParamBean {
+    private final String userAccount = "appAccount";
+    private final String token = "df6bc488b3c6f3a2140f316c923462e5";
     //id
     private int id;
     //站点编号

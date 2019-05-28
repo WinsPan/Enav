@@ -45,4 +45,8 @@ public interface SiteService {
 
     @POST("/site/search")
     Observable<BaseResponse<ListPageBean>> searchSite(@QueryMap Map<String, Object> map);
+
+    @POST("/site/update")
+    Observable<BaseResponse<String>> editSite(@QueryMap Map<String, Object> map);
+
 }
