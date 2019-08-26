@@ -1,9 +1,8 @@
 package com.tcup.transformer.transnav.mvp.model.entity;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class RangeSearchBean  implements Serializable {
+public class RangeSearchBean {
     private int status;
     private String message;
     private List<SiteListBean> data;

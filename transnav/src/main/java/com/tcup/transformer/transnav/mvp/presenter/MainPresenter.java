@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Application;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.OnLifecycleEvent;
+import android.util.Log;
 
 import com.jess.arms.integration.AppManager;
 import com.jess.arms.di.scope.ActivityScope;
@@ -96,13 +97,13 @@ public class MainPresenter extends BasePresenter<MainContract.Model, MainContrac
         }, mRootView.getRxPermissions(), mErrorHandler, pemissions);
     }
 
-    public void getRangeSites(String markLng,String markLat){
+    public void getRangeSites(String markLng, String markLat) {
         RangeParam rangeParam = new RangeParam();
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("userAccount",rangeParam.getUserAccount());
-        paramMap.put("token",rangeParam.getToken());
-        paramMap.put("markLng",markLng);
-        paramMap.put("markLat",markLat);
+        paramMap.put("userAccount", rangeParam.getUserAccount());
+        paramMap.put("token", rangeParam.getToken());
+        paramMap.put("markLng", markLng);
+        paramMap.put("markLat", markLat);
         mModel.rangeSearchSite(paramMap).subscribeOn(Schedulers.io())
                 .retryWhen(new RetryWithDelay(3, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -111,7 +112,10 @@ public class MainPresenter extends BasePresenter<MainContract.Model, MainContrac
                 .subscribe(new ErrorHandleSubscriber<RangeSearchBean>(mErrorHandler) {
                     @Override
                     public void onNext(RangeSearchBean response) {
-
+                        if (response == null || response.getStatus() != 0) {
+                            return;
+                        }
+                        mRootView.initMark(response.getData());
                     }
                 });
     }

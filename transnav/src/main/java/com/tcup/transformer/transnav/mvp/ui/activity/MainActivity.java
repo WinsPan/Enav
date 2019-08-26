@@ -229,9 +229,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             return false;
         }
         jumpPoint(marker);
-        if (!marker.getTitle().equals(siteListBean.getSiteAddr()) || siteListBean.getSiteLat() == null) {
-            return false;
-        }
         if (bottomMain.getVisibility() == View.GONE) {
             bottomMain.setVisibility(View.VISIBLE);
             bottomNav.setVisibility(View.VISIBLE);
@@ -339,8 +336,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         if (aMap == null) {
             aMap = mMapView.getMap();
             mUiSettings = aMap.getUiSettings();
-            aMap.clear();
         }
+        aMap.clear(true);
         for (SiteListBean siteListBean : rangeSiteList) {
             if (aMap == null) {
                 aMap = mMapView.getMap();
