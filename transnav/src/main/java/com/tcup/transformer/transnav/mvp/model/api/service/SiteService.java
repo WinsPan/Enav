@@ -17,6 +17,7 @@ package com.tcup.transformer.transnav.mvp.model.api.service;
 
 import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
 import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
+import com.tcup.transformer.transnav.mvp.model.entity.RangeSearchBean;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteParamBean;
 
 import java.util.Map;
@@ -49,4 +50,6 @@ public interface SiteService {
     @POST("/site/update")
     Observable<BaseResponse<String>> editSite(@QueryMap Map<String, Object> map);
 
+    @POST("/site/range/search")
+    Observable<BaseResponse<RangeSearchBean>> rangeSearchSite(@QueryMap Map<String, Object> map);
 }

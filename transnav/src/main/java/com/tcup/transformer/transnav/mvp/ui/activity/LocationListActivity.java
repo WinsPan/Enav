@@ -7,8 +7,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.jess.arms.base.BaseActivity;
@@ -45,11 +49,15 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * <a href="https://github.com/JessYanCoding/MVPArmsTemplate">模版请保持更新</a>
  * ================================================
  */
-public class LocationListActivity extends BaseActivity<LocationListPresenter> implements LocationListContract.View, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+public class LocationListActivity extends BaseActivity<LocationListPresenter> implements LocationListContract.View, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener ,SearchView.OnQueryTextListener ,CheckBox.OnCheckedChangeListener{
     @BindView(R.id.toolbar_title_head)
     TextView mTitle;
     @BindView(R.id.toolbar_back_head)
     RelativeLayout mBack;
+    @BindView(R.id.checkbox_gz)
+    CheckBox mCheckBox;
+    @BindView(R.id.serachViewPick)
+    SearchView mSearchView;
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.swipeRefreshLayout)
@@ -62,6 +70,7 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     RecyclerView.Adapter mAdapter;
     private Paginate mPaginate;
     private boolean isLoadingMore;
+    private String siteName = "";
 
 
     @Override
@@ -82,10 +91,28 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     @Override
     public void initData(@Nullable Bundle savedInstanceState) {
         mTitle.setText("变压器列表");
+        mSearchView.setOnQueryTextListener(this);
+        mCheckBox.setOnCheckedChangeListener(this);
         mBack.setOnClickListener(this::onClick);
         initRecyclerView();
         mRecyclerView.setAdapter(mAdapter);
         initPaginate();
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        if (!TextUtils.isEmpty(newText)) {
+            siteName = newText;
+            mPresenter.requestMarks(true, newText);
+        } else {
+            mPresenter.requestMarks(true,"");
+        }
+        return false;
     }
 
     /**
@@ -150,6 +177,11 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
         return mRxPermissions;
     }
 
+    @Override
+    public boolean getChecked(){
+        return mCheckBox.isChecked();
+    }
+
     /**
      * 初始化Paginate,用于加载更多
      */
@@ -171,7 +203,7 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
 
     @Override
     public void onRefresh() {
-        mPresenter.requestMarks(true);
+        mPresenter.requestMarks(true,"");
     }
 
     @Override
@@ -195,7 +227,7 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     Paginate.Callbacks callbacks = new Paginate.Callbacks() {
         @Override
         public void onLoadMore() {
-            mPresenter.requestMarks(false);
+            mPresenter.requestMarks(false,siteName);
         }
 
         @Override
@@ -208,4 +240,9 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
             return false;
         }
     };
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        mPresenter.requestMarks(true,siteName);
+    }
 }

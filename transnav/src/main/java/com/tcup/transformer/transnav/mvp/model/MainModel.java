@@ -11,6 +11,13 @@ import com.jess.arms.di.scope.ActivityScope;
 import javax.inject.Inject;
 
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
+import com.tcup.transformer.transnav.mvp.model.api.service.SiteService;
+import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
+import com.tcup.transformer.transnav.mvp.model.entity.RangeSearchBean;
+
+import java.util.Map;
+
+import io.reactivex.Observable;
 
 
 /**
@@ -35,6 +42,11 @@ public class MainModel extends BaseModel implements MainContract.Model {
     @Inject
     public MainModel(IRepositoryManager repositoryManager) {
         super(repositoryManager);
+    }
+
+    @Override
+    public Observable<BaseResponse<RangeSearchBean>> rangeSearchSite(Map<String, Object> map) {
+       return mRepositoryManager.obtainRetrofitService(SiteService.class).rangeSearchSite(map);
     }
 
     @Override

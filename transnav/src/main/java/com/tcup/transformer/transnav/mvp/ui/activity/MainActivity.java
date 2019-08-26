@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,8 +21,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.Projection;
 import com.amap.api.maps.UiSettings;
@@ -39,7 +46,6 @@ import com.litesuits.orm.db.model.ColumnsValue;
 import com.litesuits.orm.db.model.ConflictAlgorithm;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
-import com.tcup.transformer.transnav.app.EventBusTags;
 import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerMainComponent;
 import com.tcup.transformer.transnav.map.overlay.WindowAdapter;
@@ -51,8 +57,10 @@ import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -74,7 +82,7 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * ================================================
  */
 public class MainActivity extends BaseActivity<MainPresenter> implements MainContract.View, View.OnClickListener, AMap.OnMarkerClickListener,
-        AMap.OnInfoWindowClickListener {
+        AMap.OnInfoWindowClickListener ,AMap.OnMyLocationChangeListener {
     @BindView(R.id.map)
     MapView mMapView;
     @BindView(R.id.nameMain)
@@ -96,6 +104,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     private MyLocationStyle myLocationStyle;
     private SiteListBean siteListBean;
 
+    //标识，用于判断是否只显示一次定位信息和用户重新定位
+    private boolean isFirstLoc = true;
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -171,9 +181,11 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             aMap = mMapView.getMap();
             mUiSettings = aMap.getUiSettings();
         }
+        //设置定位监听
+        aMap.setOnMyLocationChangeListener(this);
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE);
-//        myLocationStyle.interval(2000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
+        myLocationStyle.interval(10000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
         myLocationStyle.strokeColor(Color.TRANSPARENT);//设置定位蓝点精度圆圈的边框颜色
         myLocationStyle.radiusFillColor(Color.TRANSPARENT);//设置定位蓝点精度圆圈的填充颜色
         aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
@@ -185,7 +197,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         mUiSettings.setCompassEnabled(true);
         aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
     }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -250,12 +261,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         // marker 被拖动的marker对象。
         @Override
         public void onMarkerDragEnd(Marker arg0) {
-            String name = arg0.getTitle();
-            ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
-                    .whereEquals("address", name)
-            );
-            ColumnsValue cv = new ColumnsValue(new String[]{"latitude", "longitude"}, new Object[]{arg0.getPosition().latitude, arg0.getPosition().longitude});
-            ORMUtil.getLiteOrm(MainActivity.this).update(query.get(0), cv, ConflictAlgorithm.None);
+//            String name = arg0.getTitle();
+//            ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
+//                    .whereEquals("address", name)
+//            );
+//            ColumnsValue cv = new ColumnsValue(new String[]{"latitude", "longitude"}, new Object[]{arg0.getPosition().latitude, arg0.getPosition().longitude});
+//            ORMUtil.getLiteOrm(MainActivity.this).update(query.get(0), cv, ConflictAlgorithm.None);
         }
 
         // 在marker拖动过程中回调此方法, 这个marker的位置可以通过getPosition()方法返回。
@@ -320,41 +331,26 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         return super.onOptionsItemSelected(item);
     }
 
-    public void initMark() {
-        ArrayList<MarketBean> marketBeans = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
-                .appendOrderDescBy("createTime"));
-        if (marketBeans.size() == 0) {
-            String[][] dataList = new String[][]{
-                    {"科技园站", "", "华艺科技园东20米左右", "31.850628", "117.209127"},
-                    {"科技园站", "", "华艺科技园东20米左右", "31.850522", "117.209427"},
-                    {"科技园站", "", "华艺科技园东20米左右", "31.850028", "117.209327"},
-                    {"科技园站", "", "华艺科技园东20米左右", "31.850928", "117.219127"},
-            };
-
-            for (String[] data : dataList) {
-                MarketBean marketBean = new MarketBean();
-                marketBean.setLatitude(Double.valueOf(data[3]));
-                marketBean.setLongitude(Double.valueOf(data[4]));
-
-                marketBean.setTitle(data[0]);
-                marketBean.setAddress(data[0]);
-                marketBean.setContent(data[2]);
-                marketBean.setCreateTime(new Date());
-                ORMUtil.getLiteOrm(MainActivity.this).save(marketBean);
-                marketBeans.add(marketBean);
-            }
+    @Override
+    public void initMark(List<SiteListBean> rangeSiteList) {
+        if (rangeSiteList==null||rangeSiteList.size()<1){
+            return;
         }
-
-        for (MarketBean marketBean : marketBeans) {
+        if (aMap == null) {
+            aMap = mMapView.getMap();
+            mUiSettings = aMap.getUiSettings();
+            aMap.clear();
+        }
+        for (SiteListBean siteListBean : rangeSiteList) {
             if (aMap == null) {
                 aMap = mMapView.getMap();
                 mUiSettings = aMap.getUiSettings();
             }
             aMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(marketBean.getLatitude(),//设置纬度
-                            marketBean.getLongitude()))//设置经度
-                    .title(marketBean.getAddress())//设置标题
-                    .snippet(marketBean.getContent())//设置内容
+                    .position(new LatLng(Double.valueOf(siteListBean.getSiteLat()),//设置纬度
+                            Double.valueOf(siteListBean.getSiteLng())))//设置经度
+                    .title(siteListBean.getSiteName())//设置标题
+                    .snippet(siteListBean.getSiteAddr())//设置内容
                     .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
                     .draggable(true) //设置Marker可拖动
                     .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
@@ -426,5 +422,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
                 }
             }
         });
+    }
+
+    @Override
+    public void onMyLocationChange(Location location) {
+        if (location==null){
+            return;
+        }
+        mPresenter.getRangeSites(String.valueOf(location.getLongitude()),String.valueOf(location.getLatitude()));
     }
 }

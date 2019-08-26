@@ -153,7 +153,7 @@ public class NavigationActivity extends BaseActivity<NavigationPresenter> implem
         //设置tab的下划线颜色,默认是粉红色
         mTabLayout.setSelectedTabIndicatorColor(Color.WHITE);
         mTabLayout.addTab(mTabLayout.newTab().setText("驾车"));
-        mTabLayout.addTab(mTabLayout.newTab().setText("步行"));
+//        mTabLayout.addTab(mTabLayout.newTab().setText("步行"));
         mTabLayout.addTab(mTabLayout.newTab().setText("骑车"));
         tvNavi.setOnClickListener(this);
         NaviLatLng startNav = (NaviLatLng) getIntent().getParcelableExtra("startNav");

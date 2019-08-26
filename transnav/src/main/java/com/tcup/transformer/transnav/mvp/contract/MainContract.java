@@ -5,6 +5,16 @@ import android.app.Activity;
 import com.jess.arms.mvp.IView;
 import com.jess.arms.mvp.IModel;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tcup.transformer.transnav.mvp.model.entity.BaseResponse;
+import com.tcup.transformer.transnav.mvp.model.entity.ListPageBean;
+import com.tcup.transformer.transnav.mvp.model.entity.RangeSearchBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
+
+import java.util.List;
+import java.util.Map;
+
+import io.reactivex.Observable;
+import retrofit2.http.QueryMap;
 
 
 /**
@@ -28,10 +38,12 @@ public interface MainContract {
         RxPermissions getRxPermissions();
 
         void initMap();
+
+        void initMark(List<SiteListBean> rangeSiteList);
     }
 
     //Model层定义接口,外部只需关心Model返回的数据,无需关心内部细节,即是否使用缓存
     interface Model extends IModel {
-
+        Observable<BaseResponse<RangeSearchBean>> rangeSearchSite(@QueryMap Map<String, Object> map);
     }
 }

@@ -76,7 +76,7 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     void onCreate() {
-        requestMarks(true);//打开 App 时自动加载列表
+        requestMarks(true,"");//打开 App 时自动加载列表
     }
 
     public int getmPage() {
@@ -87,12 +87,12 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
         return isLastPage;
     }
 
-    public void requestMarks(final boolean pullToRefresh) {
+    public void requestMarks(final boolean pullToRefresh, String siteName) {
         //请求外部存储权限用于适配android6.0的权限管理机制
         PermissionUtil.externalStorage(new PermissionUtil.RequestPermission() {
             @Override
             public void onRequestPermissionSuccess() {
-                requestFromModel(pullToRefresh);
+                requestFromModel(pullToRefresh,siteName);
             }
 
             @Override
@@ -109,17 +109,26 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
         }, mRootView.getRxPermissions(), mErrorHandler);
     }
 
-    private void requestFromModel(boolean pullToRefresh) {
+    private void requestFromModel(boolean pullToRefresh, String siteName) {
         if (pullToRefresh) {
+            isLastPage=false;
             mPage = 1;
         }//下拉刷新默认只请求第一页
         if (isLastPage) {
+            mRootView.hideLoading();
+            mRootView.endLoadMore();
             ArmsUtils.snackbarText("没有更多数据了");
             return;
         }
         QueryParam queryParam = new QueryParam();
         queryParam.setPageIndex(mPage);
         Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("siteName", siteName);
+        if (mRootView.getChecked()){
+            paramMap.put("siteStatus",2);
+        }else {
+            paramMap.put("siteStatus",1);
+        }
         paramMap.put("pageIndex", mPage);
         paramMap.put("userAccount", queryParam.getUserAccount());
         paramMap.put("token", queryParam.getToken());
