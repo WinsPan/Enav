@@ -104,6 +104,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     private MyLocationStyle myLocationStyle;
     private SiteListBean siteListBean;
 
+    List<SiteListBean> rangeSiteLists = new ArrayList<SiteListBean>();
+
     //标识，用于判断是否只显示一次定位信息和用户重新定位
     private boolean isFirstLoc = true;
 
@@ -233,11 +235,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             bottomMain.setVisibility(View.VISIBLE);
             bottomNav.setVisibility(View.VISIBLE);
         }
+        SiteListBean siteListMarkBean = rangeSiteLists.get(Integer.valueOf(marker.getTitle()));
+
         nameMain.setText("变压器信息");
-        typeMain.setText("位置名称:" + siteListBean.getSiteAddr());
-        lanLatMain.setText("经纬度信息:" + siteListBean.getSiteLng() + "," + siteListBean.getSiteLat());
-        consumeNumMain.setText("位置描述:" + siteListBean.getSiteRemark());
-        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListBean.getSiteLat()), Double.valueOf(siteListBean.getSiteLng())), 17, 0, 0)));
+        typeMain.setText("位置名称:" + siteListMarkBean.getSiteAddr());
+        lanLatMain.setText("经纬度信息:" + siteListMarkBean.getSiteLng() + "," + siteListMarkBean.getSiteLat());
+        consumeNumMain.setText("位置描述:" + siteListMarkBean.getSiteRemark());
+        aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListMarkBean.getSiteLat()), Double.valueOf(siteListMarkBean.getSiteLng())), 17, 0, 0)));
         return false;
     }
 
@@ -333,21 +337,23 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         if (rangeSiteList==null||rangeSiteList.size()<1){
             return;
         }
+        rangeSiteLists.clear();
+        rangeSiteLists.addAll(rangeSiteList);
         if (aMap == null) {
             aMap = mMapView.getMap();
             mUiSettings = aMap.getUiSettings();
         }
         aMap.clear(true);
-        for (SiteListBean siteListBean : rangeSiteList) {
+        for (int i = 0; i < rangeSiteLists.size(); i++) {
             if (aMap == null) {
                 aMap = mMapView.getMap();
                 mUiSettings = aMap.getUiSettings();
             }
             aMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(Double.valueOf(siteListBean.getSiteLat()),//设置纬度
-                            Double.valueOf(siteListBean.getSiteLng())))//设置经度
-                    .title(siteListBean.getSiteName())//设置标题
-                    .snippet(siteListBean.getSiteAddr())//设置内容
+                    .position(new LatLng(Double.valueOf(rangeSiteLists.get(i).getSiteLat()),//设置纬度
+                            Double.valueOf(rangeSiteLists.get(i).getSiteLng())))//设置经度
+                    .title(String.valueOf(i))//设置标题
+                    .snippet(rangeSiteLists.get(i).getSiteAddr())//设置内容
                     .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
                     .draggable(true) //设置Marker可拖动
                     .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
