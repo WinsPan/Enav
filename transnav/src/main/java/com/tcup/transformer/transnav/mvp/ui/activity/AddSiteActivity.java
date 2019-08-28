@@ -20,10 +20,13 @@ import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.di.component.DaggerAddSiteComponent;
+import com.tcup.transformer.transnav.map.util.ToastUtil;
 import com.tcup.transformer.transnav.mvp.contract.AddSiteContract;
 import com.tcup.transformer.transnav.mvp.model.entity.AreaBean;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
+import com.tcup.transformer.transnav.mvp.model.entity.SiteParamBean;
 import com.tcup.transformer.transnav.mvp.model.entity.TypeBean;
+import com.tcup.transformer.transnav.mvp.model.entity.UserBean;
 import com.tcup.transformer.transnav.mvp.presenter.AddSitePresenter;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -72,6 +75,8 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
 //    TextView siteDateText;
     //    @BindView(R.id.edt_site_area)
 //    TextView siteAreaText;
+    @BindView(R.id.edt_site_remark)
+    TextView siteremarkText;
     @BindView(R.id.pick_img)
     ImageButton pickImgBtn;
 
@@ -138,6 +143,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
 
     @Override
     public void killMyself() {
+        clearText();
         finish();
     }
 
@@ -171,12 +177,12 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
                         .show();
                 break;
             case R.id.pick_img:
-                ArmsUtils.startActivity(new Intent(AddSiteActivity.this, PickLocationActivity.class));
+                Intent intent = new Intent(AddSiteActivity.this, PickLocationActivity.class);
+                intent.putExtra("lonlat", siteLanEdt.getText().toString());
+                ArmsUtils.startActivity(intent);
                 break;
             case R.id.submit_btn:
-                if (siteNoEdt.getText()==null||"".equals(siteNoEdt.getText())){
-
-                }
+                submitForm();
                 break;
             default:
                 break;
@@ -204,5 +210,49 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         if (siteListBean.getSiteLat() != null && siteListBean.getSiteLat() != null) {
             siteLanEdt.setText(siteListBean.getSiteLng() + "," + siteListBean.getSiteLat());
         }
+    }
+
+    public void submitForm() {
+        if (checkForm()) {
+            UserBean userBean = new UserBean();
+            SiteParamBean siteParamBean = new SiteParamBean();
+            siteParamBean.setSiteNo(siteNoEdt.getText().toString());
+            siteParamBean.setSiteName(siteNameEdt.getText().toString());
+            siteParamBean.setSiteAddr(siteAddrEdt.getText().toString());
+            siteParamBean.setSiteLng(siteLanEdt.getText().toString().split(",")[0]);
+            siteParamBean.setSiteLat(siteLanEdt.getText().toString().split(",")[0]);
+            siteParamBean.setSiteRemark(siteremarkText.getText() == null ? "" : siteremarkText.getText().toString());
+            siteParamBean.setCreateUserId(userBean.getUserAccount());
+            mPresenter.addSite(siteParamBean);
+        }
+    }
+
+    public boolean checkForm() {
+        if (siteNoEdt.getText() == null || "".equals(siteNoEdt.getText().toString())) {
+            ToastUtil.show(AddSiteActivity.this, "请输入站点编号");
+            return false;
+        } else if (siteNameEdt.getText() == null || "".equals(siteNameEdt.getText().toString())) {
+            ToastUtil.show(AddSiteActivity.this, "请输入站点名称");
+            return false;
+        } else if (siteAddrEdt.getText() == null || "".equals(siteAddrEdt.getText().toString())) {
+            ToastUtil.show(AddSiteActivity.this, "请输入站点地址");
+            return false;
+        } else if (siteLanEdt.getText() == null || "".equals(siteLanEdt.getText().toString())) {
+            ToastUtil.show(AddSiteActivity.this, "请输入站点经纬度信息");
+            return false;
+        } else if (siteTypeText.getText() == null || "".equals(siteTypeText.getText().toString())) {
+            ToastUtil.show(AddSiteActivity.this, "清选择站点类型");
+            return false;
+        }
+        return true;
+    }
+
+    public void clearText(){
+        siteNoEdt.setText("");
+        siteNameEdt.setText("");
+        siteLanEdt.setText("");
+        siteAddrEdt.setText("");
+        siteTypeText.setText("");
+        siteremarkText.setText("");
     }
 }

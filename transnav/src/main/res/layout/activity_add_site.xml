@@ -234,6 +234,7 @@
                 android:text="站点备注:"
                 android:textSize="18sp"/>
             <EditText
+                android:id="@+id/edt_site_remark"
                 android:background="@null"
                 android:gravity="top|left"
                 android:layout_marginLeft="@dimen/dp10"

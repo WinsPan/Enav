@@ -59,12 +59,6 @@ public class LocationListModel extends BaseModel implements LocationListContract
     }
 
     @Override
-    public Observable<BaseResponse<String>> addSite(SiteParamBean siteParamBean) {
-        return mRepositoryManager.obtainRetrofitService(SiteService.class)
-                .addSite(siteParamBean);
-    }
-
-    @Override
     public Observable<BaseResponse<ListPageBean>> searchSite(Map<String, Object> map) {
         return mRepositoryManager.obtainRetrofitService(SiteService.class).searchSite(map);
     }

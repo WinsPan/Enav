@@ -48,8 +48,6 @@ public interface LocationListContract {
     interface Model extends IModel {
         Observable<List<MarketBean>> getMarks(long lastIdQueried, boolean update);
 
-        Observable<BaseResponse<String>> addSite(SiteParamBean siteParamBean);
-
         Observable<BaseResponse<ListPageBean>> searchSite(@QueryMap Map<String, Object> map);
     }
 }

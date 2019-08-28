@@ -110,13 +110,12 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
     }
 
     private void requestFromModel(boolean pullToRefresh, String siteName) {
+        mRootView.endLoadMore();
         if (pullToRefresh) {
             isLastPage=false;
             mPage = 1;
         }//下拉刷新默认只请求第一页
         if (isLastPage) {
-            mRootView.hideLoading();
-            mRootView.endLoadMore();
             ArmsUtils.snackbarText("没有更多数据了");
             return;
         }
@@ -139,8 +138,6 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
                 .doOnSubscribe(disposable -> {
                     if (pullToRefresh)
                         mRootView.showLoading();//显示下拉刷新的进度条
-                    else
-                        mRootView.startLoadMore();//显示上拉加载更多的进度条
                 }).subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doFinally(() -> {

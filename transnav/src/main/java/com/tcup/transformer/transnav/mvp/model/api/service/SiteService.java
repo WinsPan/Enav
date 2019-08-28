@@ -43,7 +43,7 @@ public interface SiteService {
     String HEADER_API_VERSION = "Accept: */*";
 
     @POST("/site/add")
-    Observable<BaseResponse<String>> addSite(@Body SiteParamBean siteParamBean);
+    Observable<BaseResponse<String>> addSite(@QueryMap Map<String, Object> map);
 
     @POST("/site/search")
     Observable<BaseResponse<ListPageBean>> searchSite(@QueryMap Map<String, Object> map);

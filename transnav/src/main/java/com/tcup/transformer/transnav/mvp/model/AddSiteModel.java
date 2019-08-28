@@ -20,6 +20,7 @@ import com.tcup.transformer.transnav.mvp.model.entity.TypeResponse;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import retrofit2.http.QueryMap;
 
 
 /**
@@ -57,8 +58,8 @@ public class AddSiteModel extends BaseModel implements AddSiteContract.Model {
     }
 
     @Override
-    public Observable<BaseResponse<String>> addSite(SiteParamBean siteParamBean) {
-        return mRepositoryManager.obtainRetrofitService(SiteService.class).addSite(siteParamBean);
+    public Observable<BaseResponse<String>> addSite(Map<String, Object> map) {
+        return mRepositoryManager.obtainRetrofitService(SiteService.class).addSite(map);
     }
 
     @Override

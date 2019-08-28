@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -59,10 +60,12 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  */
 public class PickLocationActivity extends BaseActivity<PickLocationPresenter> implements PickLocationContract.View, View.OnClickListener, AMap.OnMarkerClickListener,
         AMap.OnInfoWindowClickListener, AMap.OnMyLocationChangeListener {
-    @BindView(R.id.toolbar_title_head)
+    @BindView(R.id.toolbar_pick_title_head)
     TextView mTitle;
-    @BindView(R.id.toolbar_back_head)
+    @BindView(R.id.toolbar_pick_back_head)
     RelativeLayout mBack;
+    @BindView(R.id.submit_pick_btn)
+    Button submitBtn;
     @BindView(R.id.pic_map)
     MapView mMapView;
     @Inject
@@ -71,6 +74,7 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
     private MyLocationStyle myLocationStyle;
     AMap aMap = null;
     private SiteListBean siteListBean;
+    String lonlat;
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -91,7 +95,9 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
     public void initData(@Nullable Bundle savedInstanceState) {
         mMapView.onCreate(savedInstanceState);
         mTitle.setText("地图选点");
-        mBack.setOnClickListener(this);
+        mBack.setOnClickListener(this::onClick);
+        submitBtn.setOnClickListener(this::onClick);
+        lonlat = getIntent().getStringExtra("lonlat");
     }
 
     @Override
@@ -118,16 +124,20 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
 
     @Override
     public void killMyself() {
-        if (siteListBean != null) {
-            EventBus.getDefault().postSticky(siteListBean);
-        }
         finish();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.toolbar_back_head:
+            case R.id.toolbar_pick_back_head:
+                killMyself();
+                break;
+            case R.id.submit_pick_btn:
+                if (siteListBean != null) {
+                    EventBus.getDefault().postSticky(siteListBean);
+                }
+                aMap.clear(true);
                 killMyself();
                 break;
             default:
@@ -135,7 +145,7 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         }
     }
 
-    public void addMark(Location location) {
+    public void addMark(String lanlat) {
         double lat;
         double lon;
         if (siteListBean != null && siteListBean.getSiteLat() != null && siteListBean.getSiteLng() != null) {
@@ -143,8 +153,8 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
             lon = Double.valueOf(siteListBean.getSiteLng());
         } else {
             siteListBean = new SiteListBean();
-            lat = location.getLatitude();
-            lon = location.getLongitude();
+            lat = Double.valueOf(lanlat.split(",")[1]);
+            lon = Double.valueOf(lanlat.split(",")[0]);
         }
         aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(lat, lon), 17, 0, 0)));
         aMap.addMarker(new MarkerOptions()
@@ -190,6 +200,7 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         mUiSettings.setScaleControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);
         aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
+        addMark(lonlat);
     }
 
     // 定义 Marker拖拽的监听
@@ -268,6 +279,6 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
 
     @Override
     public void onMyLocationChange(Location location) {
-        addMark(location);
+//        addMark(location);
     }
 }

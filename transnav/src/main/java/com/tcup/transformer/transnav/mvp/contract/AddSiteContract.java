@@ -50,6 +50,6 @@ public interface AddSiteContract {
     interface Model extends IModel {
         Observable<TypeResponse> typeSearch(@QueryMap Map<String, Object> map);
         Observable<RangeSearchBean> areaSearch(@QueryMap Map<String, Object> map);
-        Observable<BaseResponse<String>> addSite(@Body SiteParamBean siteParamBean);
+        Observable<BaseResponse<String>> addSite(@QueryMap Map<String, Object> map);
     }
 }
