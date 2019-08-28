@@ -34,6 +34,7 @@ import com.tcup.transformer.transnav.mvp.contract.PickLocationContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.PickLocationPresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -117,6 +118,9 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
 
     @Override
     public void killMyself() {
+        if (siteListBean != null) {
+            EventBus.getDefault().post(siteListBean);
+        }
         finish();
     }
 
@@ -129,11 +133,6 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
             default:
                 break;
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void onSiteListBean(SiteListBean siteListBean) {
-        this.siteListBean = siteListBean;
     }
 
     public void addMark(Location location) {
@@ -212,7 +211,6 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
         public void onMarkerDragEnd(Marker arg0) {
             siteListBean.setSiteLat(String.valueOf(arg0.getPosition().latitude));
             siteListBean.setSiteLng(String.valueOf(arg0.getPosition().longitude));
-            mPresenter.editSite(siteListBean);
         }
 
         // 在marker拖动过程中回调此方法, 这个marker的位置可以通过getPosition()方法返回。
@@ -265,7 +263,6 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
     public boolean onMarkerClick(Marker marker) {
         siteListBean.setSiteLat(String.valueOf(marker.getPosition().latitude));
         siteListBean.setSiteLng(String.valueOf(marker.getPosition().longitude));
-        mPresenter.editSite(siteListBean);
         return false;
     }
 

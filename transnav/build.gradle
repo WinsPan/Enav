@@ -95,5 +95,7 @@ dependencies {
 
     implementation rootProject.ext.dependencies["multidex"]
     implementation rootProject.ext.dependencies["baseAdapter"]
+
+    implementation 'com.lxj:xpopup:1.8.8'
     //test
 }

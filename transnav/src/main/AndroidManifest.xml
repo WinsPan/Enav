@@ -2,16 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tcup.transformer.transnav">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <application
         android:name="com.jess.arms.base.BaseApplication"
         android:allowBackup="true"
@@ -20,18 +10,12 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".mvp.ui.activity.PickListActivity"></activity>
+        <activity android:name=".mvp.ui.activity.AddSiteActivity"></activity>
+        <activity android:name=".mvp.ui.activity.PickListActivity" />
         <activity android:name=".mvp.ui.activity.PickLocationActivity" />
         <activity android:name=".mvp.ui.activity.BasicNaviActivity" />
         <activity android:name=".mvp.ui.activity.NavigationActivity" />
         <activity android:name=".mvp.ui.activity.LocationListActivity" />
-
-        <meta-data
-            android:name="com.amap.api.v2.apikey"
-            android:value="63c4e29301a2a5c2c4b1de870b85cc9b">
-
-            <!-- //开发者申请的key -->
-        </meta-data>
 
         <activity
             android:name=".mvp.ui.activity.MainActivity"
@@ -42,6 +26,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="63c4e29301a2a5c2c4b1de870b85cc9b">
+
+            <!-- //开发者申请的key -->
+        </meta-data>
         <!--
          只要依赖 AutoSize 就必须填写设计图尺寸, 否则报错, 不想使用 AutoSize 就不要依赖 AutoSize
         只要填写完设计图的尺寸, AutoSize 就会自动启动, 以下 dp 尺寸是根据公式 px / (dpi / 160) 求出, 运算时使用测试机的 dpi 即可
@@ -57,5 +48,15 @@
             android:name="com.tcup.transformer.transnav.app.GlobalConfiguration"
             android:value="ConfigModule" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

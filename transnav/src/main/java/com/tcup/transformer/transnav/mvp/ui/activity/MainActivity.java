@@ -82,7 +82,7 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * ================================================
  */
 public class MainActivity extends BaseActivity<MainPresenter> implements MainContract.View, View.OnClickListener, AMap.OnMarkerClickListener,
-        AMap.OnInfoWindowClickListener ,AMap.OnMyLocationChangeListener {
+        AMap.OnInfoWindowClickListener, AMap.OnMyLocationChangeListener {
     @BindView(R.id.map)
     MapView mMapView;
     @BindView(R.id.nameMain)
@@ -199,6 +199,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         mUiSettings.setCompassEnabled(true);
         aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
     }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -322,11 +323,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             case R.id.action_list:
                 ArmsUtils.startActivity(new Intent(MainActivity.this, LocationListActivity.class));
                 return true;
-            case R.id.action_research:
-                Toast.makeText(this, "Add Contact option menu clicked!", Toast.LENGTH_SHORT).show();
-                return true;
+//            case R.id.action_research:
+//                Toast.makeText(this, "Add Contact option menu clicked!", Toast.LENGTH_SHORT).show();
+//                return true;
             case R.id.action_luru:
-                ArmsUtils.startActivity(new Intent(MainActivity.this, PickListActivity.class));
+                Intent intent = new Intent(MainActivity.this, AddSiteActivity.class);
+                intent.putExtra("lonlat", aMap.getMyLocation().getLongitude() + "," + aMap.getMyLocation().getLatitude());
+                ArmsUtils.startActivity(intent);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -334,7 +337,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Override
     public void initMark(List<SiteListBean> rangeSiteList) {
-        if (rangeSiteList==null||rangeSiteList.size()<1){
+        if (rangeSiteList == null || rangeSiteList.size() < 1) {
             return;
         }
         rangeSiteLists.clear();
@@ -429,9 +432,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Override
     public void onMyLocationChange(Location location) {
-        if (location==null){
+        if (location == null) {
             return;
         }
-        mPresenter.getRangeSites(String.valueOf(location.getLongitude()),String.valueOf(location.getLatitude()));
+        mPresenter.getRangeSites(String.valueOf(location.getLongitude()), String.valueOf(location.getLatitude()));
     }
 }
