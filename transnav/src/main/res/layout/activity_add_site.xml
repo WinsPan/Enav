@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/include_head" />
+    <include layout="@layout/include_edit_head" />
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -185,7 +185,7 @@
                 android:hint="请输入站点区域"/>
         </LinearLayout>
     </android.support.v7.widget.CardView>-->
-    <android.support.v7.widget.CardView
+    <!--<android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginTop="@dimen/dp3"
@@ -214,7 +214,7 @@
                 android:textSize="18sp"
                 android:hint="请输入投运日期"/>
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>-->
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"

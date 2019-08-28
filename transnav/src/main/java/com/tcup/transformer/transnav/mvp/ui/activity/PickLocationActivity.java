@@ -119,7 +119,7 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
     @Override
     public void killMyself() {
         if (siteListBean != null) {
-            EventBus.getDefault().post(siteListBean);
+            EventBus.getDefault().postSticky(siteListBean);
         }
         finish();
     }
@@ -142,13 +142,13 @@ public class PickLocationActivity extends BaseActivity<PickLocationPresenter> im
             lat = Double.valueOf(siteListBean.getSiteLat());
             lon = Double.valueOf(siteListBean.getSiteLng());
         } else {
+            siteListBean = new SiteListBean();
             lat = location.getLatitude();
             lon = location.getLongitude();
         }
         aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(lat, lon), 17, 0, 0)));
         aMap.addMarker(new MarkerOptions()
                 .position(new LatLng(lat, lon))//设置经度
-                .title(siteListBean.getSiteAddr())//设置标题
 //                    .snippet(marketBean.getSiteRemark())//设置内容
                 .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
                 .draggable(true) //设置Marker可拖动

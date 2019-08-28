@@ -6,29 +6,25 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.amap.api.navi.model.NaviLatLng;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
-
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.di.component.DaggerAddSiteComponent;
-import com.tcup.transformer.transnav.map.util.ToastUtil;
 import com.tcup.transformer.transnav.mvp.contract.AddSiteContract;
 import com.tcup.transformer.transnav.mvp.model.entity.AreaBean;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.model.entity.TypeBean;
 import com.tcup.transformer.transnav.mvp.presenter.AddSitePresenter;
-
-import com.tcup.transformer.transnav.R;
-
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -40,7 +36,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
-import static com.amap.api.maps.model.BitmapDescriptorFactory.getContext;
 import static com.jess.arms.utils.Preconditions.checkNotNull;
 
 
@@ -57,10 +52,12 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * ================================================
  */
 public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements AddSiteContract.View, View.OnClickListener {
-    @BindView(R.id.toolbar_title_head)
+    @BindView(R.id.toolbar_edit_title_head)
     TextView mTitle;
-    @BindView(R.id.toolbar_back_head)
+    @BindView(R.id.toolbar_edit_back_head)
     RelativeLayout mBack;
+    @BindView(R.id.submit_btn)
+    Button submitBtn;
     @BindView(R.id.edt_site_no)
     EditText siteNoEdt;
     @BindView(R.id.edt_site_name)
@@ -71,8 +68,8 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     EditText siteLanEdt;
     @BindView(R.id.edt_site_type)
     TextView siteTypeText;
-    @BindView(R.id.edt_site_date)
-    TextView siteDateText;
+    //    @BindView(R.id.edt_site_date)
+//    TextView siteDateText;
     //    @BindView(R.id.edt_site_area)
 //    TextView siteAreaText;
     @BindView(R.id.pick_img)
@@ -110,8 +107,10 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         mTitle.setText("新增站点");
         siteTypeText.setOnClickListener(this::onClick);
 //        siteAreaText.setOnClickListener(this::onClick);
-        siteDateText.setOnClickListener(this::onClick);
+//        siteDateText.setOnClickListener(this::onClick);
         pickImgBtn.setOnClickListener(this::onClick);
+        mBack.setOnClickListener(this::onClick);
+        submitBtn.setOnClickListener(this::onClick);
         siteLanEdt.setText(getIntent().getStringExtra("lonlat"));
     }
 
@@ -155,7 +154,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.toolbar_back_head:
+            case R.id.toolbar_edit_back_head:
                 killMyself();
                 break;
             case R.id.edt_site_type:
@@ -195,8 +194,10 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         areaBeanList.addAll(areaBeans);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onSiteListBean(SiteListBean siteListBean) {
-        siteLanEdt.setText(siteListBean.getSiteLng() + "," + siteListBean.getSiteLat());
+        if (siteListBean.getSiteLat() != null && siteListBean.getSiteLat() != null) {
+            siteLanEdt.setText(siteListBean.getSiteLng() + "," + siteListBean.getSiteLat());
+        }
     }
 }
