@@ -173,6 +173,11 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
             case R.id.pick_img:
                 ArmsUtils.startActivity(new Intent(AddSiteActivity.this, PickLocationActivity.class));
                 break;
+            case R.id.submit_btn:
+                if (siteNoEdt.getText()==null||"".equals(siteNoEdt.getText())){
+
+                }
+                break;
             default:
                 break;
         }
