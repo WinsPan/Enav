@@ -35,6 +35,7 @@ import com.amap.api.navi.model.NaviLatLng;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
+import com.jess.arms.utils.LogUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.di.component.DaggerMainComponent;
@@ -189,6 +190,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         this.mRxPermissions = null;
         if (mMapView != null) {
             mMapView.onDestroy();
+        }
+        if (aMap != null) {
+            aMap.clear();
+            aMap.setOnMyLocationChangeListener(null);
         }
     }
 
