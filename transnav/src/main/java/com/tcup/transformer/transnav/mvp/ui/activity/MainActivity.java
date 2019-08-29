@@ -398,6 +398,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSiteListBean(SiteListBean siteListBean) {
         this.siteListBean = siteListBean;
+        rangeSiteLists.clear();
+        rangeSiteLists.add(siteListBean);
         if (siteListBean.getSiteLat() != null && siteListBean.getSiteLng() != null) {
             myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
             aMap.setMyLocationStyle(myLocationStyle);
@@ -410,7 +412,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             aMap.addMarker(new MarkerOptions()
                     .position(new LatLng(Double.valueOf(siteListBean.getSiteLat()),//设置纬度
                             Double.valueOf(siteListBean.getSiteLng())))//设置经度
-                    .title(siteListBean.getSiteAddr())//设置标题
+                    .title("0")//设置标题
 //                    .snippet(marketBean.getSiteRemark())//设置内容
                     .setFlat(true) // 将Marker设置为贴地显示，可以双指下拉地图查看效果
                     .draggable(true) //设置Marker可拖动
