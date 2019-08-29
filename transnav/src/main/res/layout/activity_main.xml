@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -16,13 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+
     </LinearLayout>
 
-    <LinearLayout
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical">
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="@dimen/dp100"
+        app:layout_behavior="@string/bottom_sheet_behavior">
 
         <LinearLayout
             android:id="@+id/bottomMain"
@@ -42,7 +46,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/nameMain"
+                    android:id="@+id/site_title_show"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -53,50 +57,107 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/typeMain"
+                android:id="@+id/site_no_show"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="4dp"
                 android:textSize="14sp"
-                tools:text="名称" />
+                tools:text="站点编号" />
 
             <TextView
-                android:id="@+id/lanlatMain"
+                android:id="@+id/site_name_show"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="4dp"
                 android:textSize="14sp"
-                tools:text="经纬度" />
-
+                tools:text="站点名称" />
             <TextView
-                android:id="@+id/contentMain"
+                android:id="@+id/site_addr_show"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="4dp"
                 android:textSize="14sp"
-                tools:text="内容" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/bottomNav"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_item"
-            android:orientation="vertical"
-            android:visibility="gone">
+                tools:text="站点地址" />
+            <TextView
+                android:id="@+id/site_date_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="投运日期" />
 
             <TextView
+                android:id="@+id/site_lon_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="站点经度" />
+            <TextView
+                android:id="@+id/site_lat_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="站点纬度" />
+            <TextView
+                android:id="@+id/site_type_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="站点类型" />
+            <TextView
+                android:id="@+id/site_area_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="站点区域" />
+            <TextView
+                android:id="@+id/site_status_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="站点状态" />
+            <TextView
+                android:id="@+id/site_mark_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                tools:text="站点备注" />
+
+            <LinearLayout
+                android:id="@+id/bottomNav"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/blue_light"
-                android:gravity="center"
-                android:text="导  航"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:layout_height="48dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_item"
+                android:orientation="vertical"
+                android:visibility="gone">
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/blue_light"
+                    android:gravity="center"
+                    android:text="导  航"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</FrameLayout>
+    </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

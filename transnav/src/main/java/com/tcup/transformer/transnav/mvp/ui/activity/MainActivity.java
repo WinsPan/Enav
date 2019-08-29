@@ -11,7 +11,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.design.widget.BottomSheetBehavior;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,15 +19,9 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.amap.api.location.AMapLocation;
-import com.amap.api.location.AMapLocationClient;
-import com.amap.api.location.AMapLocationClientOption;
-import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
-import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.Projection;
 import com.amap.api.maps.UiSettings;
@@ -41,15 +35,10 @@ import com.amap.api.navi.model.NaviLatLng;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
-import com.litesuits.orm.db.assit.QueryBuilder;
-import com.litesuits.orm.db.model.ColumnsValue;
-import com.litesuits.orm.db.model.ConflictAlgorithm;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
-import com.tcup.transformer.transnav.bean.MarketBean;
 import com.tcup.transformer.transnav.di.component.DaggerMainComponent;
 import com.tcup.transformer.transnav.map.overlay.WindowAdapter;
-import com.tcup.transformer.transnav.map.util.ORMUtil;
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
@@ -57,9 +46,7 @@ import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -85,14 +72,28 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         AMap.OnInfoWindowClickListener, AMap.OnMyLocationChangeListener {
     @BindView(R.id.map)
     MapView mMapView;
-    @BindView(R.id.nameMain)
-    TextView nameMain;
-    @BindView(R.id.typeMain)
-    TextView typeMain;
-    @BindView(R.id.lanlatMain)
-    TextView consumeNumMain;
-    @BindView(R.id.contentMain)
-    TextView lanLatMain;
+    @BindView(R.id.site_title_show)
+    TextView siteTitleText;
+    @BindView(R.id.site_no_show)
+    TextView siteNoText;
+    @BindView(R.id.site_name_show)
+    TextView siteNameText;
+    @BindView(R.id.site_addr_show)
+    TextView siteAddrText;
+    @BindView(R.id.site_date_show)
+    TextView siteDateText;
+    @BindView(R.id.site_lon_show)
+    TextView siteLonText;
+    @BindView(R.id.site_lat_show)
+    TextView siteLatText;
+    @BindView(R.id.site_type_show)
+    TextView siteTypeText;
+    @BindView(R.id.site_area_show)
+    TextView siteAreaText;
+    @BindView(R.id.site_status_show)
+    TextView siteStatusText;
+    @BindView(R.id.site_mark_show)
+    TextView siteMarkText;
     @BindView(R.id.bottomMain)
     LinearLayout bottomMain;
     @BindView(R.id.bottomNav)
@@ -108,6 +109,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     //标识，用于判断是否只显示一次定位信息和用户重新定位
     private boolean isFirstLoc = true;
+    BottomSheetBehavior behavior;
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -129,6 +131,19 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
         bottomNav.setOnClickListener(this);
+        View bottomSheet = findViewById(R.id.bottom_sheet);
+        behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                //这里是bottomSheet 状态的改变
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                //这里是拖拽中的回调，根据slideOffset可以做一些动画
+            }
+        });
     }
 
     @Override
@@ -204,10 +219,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bottomNav:
-                String[] re = lanLatMain.getText().toString().split(":");
-                String[] strings = re[1].split(",");
                 NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
-                NaviLatLng endNav = new NaviLatLng(Double.valueOf(strings[1]), Double.valueOf(strings[0]));
+                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
                 Intent intent = new Intent(MainActivity.this, NavigationActivity.class);
                 intent.putExtra("startNav", startNav);
                 intent.putExtra("endNav", endNav);
@@ -235,13 +248,21 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         if (bottomMain.getVisibility() == View.GONE) {
             bottomMain.setVisibility(View.VISIBLE);
             bottomNav.setVisibility(View.VISIBLE);
+            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
         SiteListBean siteListMarkBean = rangeSiteLists.get(Integer.valueOf(marker.getTitle()));
 
-        nameMain.setText("变压器信息");
-        typeMain.setText("位置名称:" + siteListMarkBean.getSiteAddr());
-        lanLatMain.setText("经纬度信息:" + siteListMarkBean.getSiteLng() + "," + siteListMarkBean.getSiteLat());
-        consumeNumMain.setText("位置描述:" + siteListMarkBean.getSiteRemark());
+        siteTitleText.setText("站点信息：");
+        siteNoText.setText("站点编号：" + (siteListMarkBean.getSiteNo() == null ? "" : siteListMarkBean.getSiteNo()));
+        siteNameText.setText("站点名称：" + (siteListMarkBean.getSiteName() == null ? "" : siteListMarkBean.getSiteName()));
+        siteAddrText.setText("站点地址：" + (siteListMarkBean.getSiteAddr() == null ? "" : siteListMarkBean.getSiteAddr()));
+        siteDateText.setText("投运日期：" + (siteListMarkBean.getSiteDate() == null ? "" : siteListMarkBean.getSiteDate()));
+        siteLonText.setText("站点经度：" + (siteListMarkBean.getSiteLng() == null ? "" : siteListMarkBean.getSiteLng()));
+        siteLatText.setText("站点纬度：" + (siteListMarkBean.getSiteLat() == null ? "" : siteListMarkBean.getSiteLat()));
+        siteTypeText.setText("站点类型：" + (siteListMarkBean.getEqpTypeDomain().getTypeName() == null ? "" : siteListMarkBean.getEqpTypeDomain().getTypeName()));
+        siteAreaText.setText("站点区域：" + (siteListMarkBean.getEqpAreaDomain().getRegion() == null ? "" : siteListMarkBean.getEqpAreaDomain().getRegion()));
+        siteStatusText.setText("站点状态：" + (siteListMarkBean.getSiteStatus() == null ? "" : siteListMarkBean.getSiteStatus()));
+        siteMarkText.setText("站点备注：" + (siteListMarkBean.getSiteRemark() == null ? "" : siteListMarkBean.getSiteRemark()));
         aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListMarkBean.getSiteLat()), Double.valueOf(siteListMarkBean.getSiteLng())), 17, 0, 0)));
         return false;
     }
