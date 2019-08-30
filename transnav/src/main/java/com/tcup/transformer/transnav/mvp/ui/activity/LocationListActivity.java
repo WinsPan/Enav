@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
@@ -19,7 +18,12 @@ import com.jess.arms.base.BaseActivity;
 import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
+import com.jess.arms.utils.LogUtils;
 import com.paginate.Paginate;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.di.component.DaggerLocationListComponent;
@@ -49,7 +53,7 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * <a href="https://github.com/JessYanCoding/MVPArmsTemplate">模版请保持更新</a>
  * ================================================
  */
-public class LocationListActivity extends BaseActivity<LocationListPresenter> implements LocationListContract.View, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener ,SearchView.OnQueryTextListener ,CheckBox.OnCheckedChangeListener{
+public class LocationListActivity extends BaseActivity<LocationListPresenter> implements LocationListContract.View, OnRefreshListener, OnLoadmoreListener, View.OnClickListener ,SearchView.OnQueryTextListener ,CheckBox.OnCheckedChangeListener{
     @BindView(R.id.toolbar_title_head)
     TextView mTitle;
     @BindView(R.id.toolbar_back_head)
@@ -60,8 +64,8 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     SearchView mSearchView;
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
-    @BindView(R.id.swipeRefreshLayout)
-    SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.refreshLayout)
+    SmartRefreshLayout mSwipeRefreshLayout;
     @Inject
     RecyclerView.LayoutManager mLayoutManager;
     @Inject
@@ -110,7 +114,9 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
             siteName = newText;
             mPresenter.requestMarks(true, newText);
         } else {
-            mPresenter.requestMarks(true,"");
+            siteName = "";
+            mSwipeRefreshLayout.resetNoMoreData();
+            mPresenter.requestMarks(true,siteName);
         }
         return false;
     }
@@ -120,18 +126,17 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
      */
     private void initRecyclerView() {
         mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setOnLoadmoreListener(this);
         ArmsUtils.configRecyclerView(mRecyclerView, mLayoutManager);
     }
 
 
     @Override
     public void showLoading() {
-        mSwipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
     public void hideLoading() {
-        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -149,22 +154,6 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     @Override
     public void killMyself() {
         finish();
-    }
-
-    /**
-     * 开始加载更多
-     */
-    @Override
-    public void startLoadMore() {
-        isLoadingMore = true;
-    }
-
-    /**
-     * 结束加载更多
-     */
-    @Override
-    public void endLoadMore() {
-        isLoadingMore = false;
     }
 
     @Override
@@ -186,12 +175,6 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
      * 初始化Paginate,用于加载更多
      */
     private void initPaginate() {
-        if (mPaginate == null) {
-            mPaginate = Paginate.with(mRecyclerView, callbacks)
-                    .setLoadingTriggerThreshold(0)
-                    .build();
-            mPaginate.setHasMoreDataToLoad(false);
-        }
     }
 
     @Override
@@ -199,11 +182,6 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
         DefaultAdapter.releaseAllHolder(mRecyclerView);//super.onDestroy()之后会unbind,所有view被置为null,所以必须在之前调用
         super.onDestroy();
         this.mRxPermissions = null;
-    }
-
-    @Override
-    public void onRefresh() {
-        mPresenter.requestMarks(true,"");
     }
 
     @Override
@@ -224,25 +202,26 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
         }
     }
 
-    Paginate.Callbacks callbacks = new Paginate.Callbacks() {
-        @Override
-        public void onLoadMore() {
-            mPresenter.requestMarks(false,siteName);
-        }
-
-        @Override
-        public boolean isLoading() {
-            return isLoadingMore;
-        }
-
-        @Override
-        public boolean hasLoadedAllItems() {
-            return false;
-        }
-    };
-
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         mPresenter.requestMarks(true,siteName);
+    }
+
+    @Override
+    public void onLoadmore(RefreshLayout refreshlayout) {
+        refreshlayout.finishLoadmore(1000);
+        mPresenter.requestMarks(false,siteName);
+    }
+
+    @Override
+    public void onRefresh(RefreshLayout refreshlayout) {
+        refreshlayout.finishRefresh(1000);
+        mSwipeRefreshLayout.resetNoMoreData();
+        mPresenter.requestMarks(true,siteName);
+    }
+
+    @Override
+    public void finishNoMore() {
+        mSwipeRefreshLayout.finishLoadmoreWithNoMoreData();//将不会再次触发加载更多事件
     }
 }

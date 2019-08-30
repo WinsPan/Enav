@@ -110,13 +110,13 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
     }
 
     private void requestFromModel(boolean pullToRefresh, String siteName) {
-        mRootView.endLoadMore();
         if (pullToRefresh) {
             isLastPage=false;
             mPage = 1;
         }//下拉刷新默认只请求第一页
         if (isLastPage) {
-            ArmsUtils.snackbarText("没有更多数据了");
+//            ArmsUtils.snackbarText("没有更多数据了");
+            mRootView.finishNoMore();
             return;
         }
         QueryParam queryParam = new QueryParam();
@@ -143,8 +143,6 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
                 .doFinally(() -> {
                     if (pullToRefresh)
                         mRootView.hideLoading();//隐藏下拉刷新的进度条
-                    else
-                        mRootView.endLoadMore();//隐藏上拉加载更多的进度条
                 })
                 .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
                 .subscribe(new ErrorHandleSubscriber<BaseResponse<ListPageBean>>(mErrorHandler) {

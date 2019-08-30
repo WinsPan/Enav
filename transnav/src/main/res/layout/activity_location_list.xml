@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <include layout="@layout/include_head" />
@@ -27,19 +28,27 @@
             android:queryHint="请输入站点名称"></SearchView>
     </LinearLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="4dp"
-        android:paddingTop="4dp">
-
+        app:srlAccentColor="@color/colorTextContent"
+        app:srlPrimaryColor="@android:color/transparent"
+        app:srlEnableLoadMore="true"
+        app:srlEnableAutoLoadMore="false"
+        app:srlEnableScrollContentWhenLoaded="true"
+        app:srlEnableFooterFollowWhenLoadFinished="true">
+        <com.scwang.smartrefresh.layout.header.ClassicsHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="none"
             tools:listitem="@layout/holder_consume" />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
+        <com.scwang.smartrefresh.layout.footer.ClassicsFooter
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp30"/>
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 </LinearLayout>
