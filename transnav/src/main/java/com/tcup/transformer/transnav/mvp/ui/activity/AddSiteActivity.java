@@ -33,11 +33,14 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import cn.qqtheme.framework.picker.DatePicker;
+import cn.qqtheme.framework.util.ConvertUtils;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
 
@@ -71,8 +74,8 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     EditText siteLanEdt;
     @BindView(R.id.edt_site_type)
     TextView siteTypeText;
-    //    @BindView(R.id.edt_site_date)
-//    TextView siteDateText;
+    @BindView(R.id.edt_site_date)
+    TextView siteDateText;
     //    @BindView(R.id.edt_site_area)
 //    TextView siteAreaText;
     @BindView(R.id.edt_site_remark)
@@ -112,7 +115,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         mTitle.setText("新增站点");
         siteTypeText.setOnClickListener(this::onClick);
 //        siteAreaText.setOnClickListener(this::onClick);
-//        siteDateText.setOnClickListener(this::onClick);
+        siteDateText.setOnClickListener(this::onClick);
         pickImgBtn.setOnClickListener(this::onClick);
         mBack.setOnClickListener(this::onClick);
         submitBtn.setOnClickListener(this::onClick);
@@ -184,6 +187,9 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
             case R.id.submit_btn:
                 submitForm();
                 break;
+            case R.id.edt_site_date:
+                onYearMonthDayPicker();
+                break;
             default:
                 break;
         }
@@ -223,6 +229,9 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
             siteParamBean.setSiteLat(siteLanEdt.getText().toString().split(",")[0]);
             siteParamBean.setSiteRemark(siteremarkText.getText() == null ? "" : siteremarkText.getText().toString());
             siteParamBean.setCreateUserId(userBean.getUserAccount());
+            siteParamBean.setSiteDate(siteDateText.getText().toString());
+            siteParamBean.setOperateUserId(userBean.getUserAccount());
+            siteParamBean.setSiteStatus("1");
             mPresenter.addSite(siteParamBean);
         }
     }
@@ -243,16 +252,54 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         } else if (siteTypeText.getText() == null || "".equals(siteTypeText.getText().toString())) {
             ToastUtil.show(AddSiteActivity.this, "清选择站点类型");
             return false;
+        } else if (siteDateText.getText() == null || "".equals(siteDateText.getText().toString())) {
+            ToastUtil.show(AddSiteActivity.this, "清选择投运日期");
+            return false;
         }
         return true;
     }
 
-    public void clearText(){
+    public void clearText() {
         siteNoEdt.setText("");
         siteNameEdt.setText("");
         siteLanEdt.setText("");
         siteAddrEdt.setText("");
         siteTypeText.setText("");
         siteremarkText.setText("");
+    }
+
+    public void onYearMonthDayPicker() {
+        final DatePicker picker = new DatePicker(this);
+        Calendar cal = Calendar.getInstance();
+        picker.setCanceledOnTouchOutside(true);
+        picker.setUseWeight(true);
+        picker.setTopPadding(ConvertUtils.toPx(this, 10));
+        picker.setRangeEnd(2050, 1, 11);
+        picker.setRangeStart(1990, 1, 1);
+        picker.setSelectedItem(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
+        picker.setResetWhileWheel(false);
+        picker.setOnDatePickListener(new DatePicker.OnYearMonthDayPickListener() {
+            @Override
+            public void onDatePicked(String year, String month, String day) {
+                siteDateText.setText(year + "-" + month + "-" + day);
+            }
+        });
+        picker.setOnWheelListener(new DatePicker.OnWheelListener() {
+            @Override
+            public void onYearWheeled(int index, String year) {
+                picker.setTitleText(year + "-" + picker.getSelectedMonth() + "-" + picker.getSelectedDay());
+            }
+
+            @Override
+            public void onMonthWheeled(int index, String month) {
+                picker.setTitleText(picker.getSelectedYear() + "-" + month + "-" + picker.getSelectedDay());
+            }
+
+            @Override
+            public void onDayWheeled(int index, String day) {
+                picker.setTitleText(picker.getSelectedYear() + "-" + picker.getSelectedMonth() + "-" + day);
+            }
+        });
+        picker.show();
     }
 }

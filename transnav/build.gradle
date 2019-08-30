@@ -97,5 +97,9 @@ dependencies {
     implementation rootProject.ext.dependencies["baseAdapter"]
 
     implementation 'com.lxj:xpopup:1.8.8'
+
+    compile('com.github.gzu-liyujiang.AndroidPicker:WheelPicker:1.5.6.20181018') {
+        exclude group: 'com.android.support'
+    }
     //test
 }
