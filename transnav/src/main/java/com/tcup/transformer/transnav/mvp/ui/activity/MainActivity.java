@@ -12,6 +12,7 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.widget.NestedScrollView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -96,7 +97,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     @BindView(R.id.site_mark_show)
     TextView siteMarkText;
     @BindView(R.id.bottomMain)
-    LinearLayout bottomMain;
+    NestedScrollView bottomMain;
     @BindView(R.id.bottomNav)
     LinearLayout bottomNav;
     @Inject
@@ -132,12 +133,17 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
         bottomNav.setOnClickListener(this);
-        View bottomSheet = findViewById(R.id.bottom_sheet);
+        View bottomSheet = findViewById(R.id.bottomMain);
         behavior = BottomSheetBehavior.from(bottomSheet);
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 //这里是bottomSheet 状态的改变
+                if (newState==BottomSheetBehavior.STATE_EXPANDED){
+                    bottomNav.setVisibility(View.VISIBLE);
+                }else {
+                    bottomNav.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -252,7 +258,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         jumpPoint(marker);
         if (bottomMain.getVisibility() == View.GONE) {
             bottomMain.setVisibility(View.VISIBLE);
-            bottomNav.setVisibility(View.VISIBLE);
             behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
         SiteListBean siteListMarkBean = rangeSiteLists.get(Integer.valueOf(marker.getTitle()));
