@@ -79,6 +79,10 @@ import static com.tcup.transformer.transnav.R.id.ll_itemview;
 public class NavigationActivity extends BaseActivity<NavigationPresenter> implements NavigationContract.View, AMapNaviListener, AMapNaviViewListener, View.OnClickListener {
 
     private static final String TAG = "NavigationActivity";
+    @BindView(R.id.toolbar_title_head)
+    TextView mTitle;
+    @BindView(R.id.toolbar_back_head)
+    RelativeLayout mBack;
     @BindView(R.id.tabs)
     TabLayout mTabLayout;
     @BindView(R.id.rl_tv_navistart)
@@ -141,6 +145,8 @@ public class NavigationActivity extends BaseActivity<NavigationPresenter> implem
         initViews();
         mapview.onCreate(savedInstanceState);
         initMap();
+        mTitle.setText("导航");
+        mBack.setOnClickListener(this::onClick);
     }
 
 
@@ -218,6 +224,11 @@ public class NavigationActivity extends BaseActivity<NavigationPresenter> implem
         switch (v.getId()) {
             case R.id.rl_tv_navistart:
                 clickNavigation();
+                break;
+            case R.id.toolbar_back_head:
+                killMyself();
+                break;
+            default:
                 break;
         }
     }

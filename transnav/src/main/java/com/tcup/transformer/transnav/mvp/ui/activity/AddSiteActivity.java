@@ -274,8 +274,8 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         picker.setCanceledOnTouchOutside(true);
         picker.setUseWeight(true);
         picker.setTopPadding(ConvertUtils.toPx(this, 10));
-        picker.setRangeEnd(2050, 1, 11);
-        picker.setRangeStart(1990, 1, 1);
+        picker.setRangeEnd(2050, 1, 1);
+        picker.setRangeStart(1950, 1, 1);
         picker.setSelectedItem(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
         picker.setResetWhileWheel(false);
         picker.setOnDatePickListener(new DatePicker.OnYearMonthDayPickListener() {

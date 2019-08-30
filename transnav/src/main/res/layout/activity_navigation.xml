@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
+    <include layout="@layout/include_head" />
     <RelativeLayout
         android:id="@+id/ll_rl_toplayput"
         android:layout_width="match_parent"
@@ -15,8 +15,7 @@
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp" />
+            android:layout_height="@dimen/dp20"/>
     </RelativeLayout>
 
     <com.amap.api.maps.MapView
