@@ -239,8 +239,8 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     }
 
     public void submitForm() {
-        WaitDialog.show(AddSiteActivity.this, "请稍候...");
         if (checkForm()) {
+            WaitDialog.show(AddSiteActivity.this, "请稍候...");
             UserBean userBean = new UserBean();
             SiteParamBean siteParamBean = new SiteParamBean();
             siteParamBean.setSiteNo(siteNoEdt.getText().toString());
