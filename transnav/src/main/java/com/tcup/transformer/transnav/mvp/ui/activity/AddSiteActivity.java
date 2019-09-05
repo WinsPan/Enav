@@ -9,12 +9,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
+import com.kongzue.dialog.v3.WaitDialog;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -57,7 +60,7 @@ import static com.jess.arms.utils.Preconditions.checkNotNull;
  * <a href="https://github.com/JessYanCoding/MVPArmsTemplate">模版请保持更新</a>
  * ================================================
  */
-public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements AddSiteContract.View, View.OnClickListener {
+public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements AddSiteContract.View, View.OnClickListener,RadioGroup.OnCheckedChangeListener {
     @BindView(R.id.toolbar_edit_title_head)
     TextView mTitle;
     @BindView(R.id.toolbar_edit_back_head)
@@ -76,6 +79,9 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     TextView siteTypeText;
     @BindView(R.id.edt_site_date)
     TextView siteDateText;
+
+    @BindView(R.id.radioGroup)
+    RadioGroup radioGroup;
     //    @BindView(R.id.edt_site_area)
 //    TextView siteAreaText;
     @BindView(R.id.edt_site_remark)
@@ -85,6 +91,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
 
     private int typeIndex = 0;
     private int areaIndex = 0;
+    private String siteStatu = "1";
 
 
     private List<TypeBean> typeBeanList = new ArrayList<TypeBean>();
@@ -119,6 +126,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         pickImgBtn.setOnClickListener(this::onClick);
         mBack.setOnClickListener(this::onClick);
         submitBtn.setOnClickListener(this::onClick);
+        radioGroup.setOnCheckedChangeListener(this::onCheckedChanged);
         siteLanEdt.setText(getIntent().getStringExtra("lonlat"));
     }
 
@@ -135,6 +143,8 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     @Override
     public void showMessage(@NonNull String message) {
         checkNotNull(message);
+        WaitDialog.dismiss();
+        clearText();
         ArmsUtils.snackbarText(message);
     }
 
@@ -211,6 +221,16 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         areaBeanList.addAll(areaBeans);
     }
 
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        RadioButton radbtn = (RadioButton) findViewById(checkedId);
+        if ("正常".equals(radbtn.getText().toString())){
+            siteStatu = "1";
+        }else {
+            siteStatu = "2";
+        }
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onSiteListBean(SiteListBean siteListBean) {
         if (siteListBean.getSiteLat() != null && siteListBean.getSiteLat() != null) {
@@ -219,6 +239,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     }
 
     public void submitForm() {
+        WaitDialog.show(AddSiteActivity.this, "请稍候...");
         if (checkForm()) {
             UserBean userBean = new UserBean();
             SiteParamBean siteParamBean = new SiteParamBean();
@@ -226,12 +247,12 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
             siteParamBean.setSiteName(siteNameEdt.getText().toString());
             siteParamBean.setSiteAddr(siteAddrEdt.getText().toString());
             siteParamBean.setSiteLng(siteLanEdt.getText().toString().split(",")[0]);
-            siteParamBean.setSiteLat(siteLanEdt.getText().toString().split(",")[0]);
+            siteParamBean.setSiteLat(siteLanEdt.getText().toString().split(",")[1]);
             siteParamBean.setSiteRemark(siteremarkText.getText() == null ? "" : siteremarkText.getText().toString());
             siteParamBean.setCreateUserId(userBean.getUserAccount());
             siteParamBean.setSiteDate(siteDateText.getText().toString());
             siteParamBean.setOperateUserId(userBean.getUserAccount());
-            siteParamBean.setSiteStatus("1");
+            siteParamBean.setSiteStatus(siteStatu);
             mPresenter.addSite(siteParamBean);
         }
     }
@@ -281,7 +302,7 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
         picker.setOnDatePickListener(new DatePicker.OnYearMonthDayPickListener() {
             @Override
             public void onDatePicked(String year, String month, String day) {
-                siteDateText.setText(year + "-" + month + "-" + day);
+                siteDateText.setText(year + month + day);
             }
         });
         picker.setOnWheelListener(new DatePicker.OnWheelListener() {

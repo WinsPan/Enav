@@ -137,7 +137,6 @@ public class AddSitePresenter extends BasePresenter<AddSiteContract.Model, AddSi
                             mRootView.showMessage(response.getMessage());
                         }else {
                             mRootView.showMessage(response.getMessage());
-                            mRootView.killMyself();
                         }
                     }
                 });

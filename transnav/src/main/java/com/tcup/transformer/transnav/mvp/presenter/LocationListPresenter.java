@@ -122,7 +122,7 @@ public class LocationListPresenter extends BasePresenter<LocationListContract.Mo
         QueryParam queryParam = new QueryParam();
         queryParam.setPageIndex(mPage);
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("siteName", siteName);
+        paramMap.put("siteNoOrName", siteName);
         if (mRootView.getChecked()){
             paramMap.put("siteStatus",2);
         }else {

@@ -109,13 +109,13 @@ public class MainPresenter extends BasePresenter<MainContract.Model, MainContrac
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
-                .subscribe(new ErrorHandleSubscriber<RangeSearchBean>(mErrorHandler) {
+                .subscribe(new ErrorHandleSubscriber<BaseResponse<RangeSearchBean>>(mErrorHandler) {
                     @Override
-                    public void onNext(RangeSearchBean response) {
+                    public void onNext(BaseResponse<RangeSearchBean> response) {
                         if (response == null || response.getStatus() != 0) {
                             return;
                         }
-                        mRootView.initMark(response.getData());
+                        mRootView.initMark(response.getData().getRangeSiteList());
                     }
                 });
     }

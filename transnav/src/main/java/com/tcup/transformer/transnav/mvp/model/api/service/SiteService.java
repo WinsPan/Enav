@@ -52,7 +52,7 @@ public interface SiteService {
     Observable<BaseResponse<String>> editSite(@QueryMap Map<String, Object> map);
 
     @POST("/site/range/search")
-    Observable<RangeSearchBean> rangeSearchSite(@QueryMap Map<String, Object> map);
+    Observable<BaseResponse<RangeSearchBean>> rangeSearchSite(@QueryMap Map<String, Object> map);
 
     @POST("type/search")
     Observable<TypeResponse> typeSearch(@QueryMap Map<String, Object> map);

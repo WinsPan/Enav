@@ -155,6 +155,45 @@
                 android:hint="请选择站点类型"/>
         </LinearLayout>
     </android.support.v7.widget.CardView>
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="@dimen/dp3"
+        app:cardCornerRadius="@dimen/dp3"
+        app:cardElevation="@dimen/dp3">
+        <LinearLayout
+            android:layout_marginTop="@dimen/dp5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_marginLeft="@dimen/dp10"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="站点状态:"
+                android:textSize="18sp"/>
+           <RadioGroup
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:id="@+id/radioGroup"
+               android:orientation="horizontal">
+               <RadioButton
+                   android:id="@+id/radio_normal"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="正常"
+                   android:checked="true"
+                   android:layout_gravity="center_vertical"/>
+               <RadioButton
+                   android:id="@+id/radio_exception"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="故障"
+                   android:layout_gravity="center_vertical"/>
+           </RadioGroup>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
    <!-- <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="48dp"

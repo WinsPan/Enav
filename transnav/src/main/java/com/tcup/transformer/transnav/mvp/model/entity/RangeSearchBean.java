@@ -3,31 +3,22 @@ package com.tcup.transformer.transnav.mvp.model.entity;
 import java.util.List;
 
 public class RangeSearchBean {
-    private int status;
-    private String message;
-    private List<SiteListBean> data;
+    private String range;
+    private List<SiteListBean> rangeSiteList;
 
-    public int getStatus() {
-        return status;
+    public String getRange() {
+        return range;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void setRange(String range) {
+        this.range = range;
     }
 
-    public String getMessage() {
-        return message;
+    public List<SiteListBean> getRangeSiteList() {
+        return rangeSiteList;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public List<SiteListBean> getData() {
-        return data;
-    }
-
-    public void setData(List<SiteListBean> data) {
-        this.data = data;
+    public void setRangeSiteList(List<SiteListBean> rangeSiteList) {
+        this.rangeSiteList = rangeSiteList;
     }
 }

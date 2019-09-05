@@ -45,7 +45,7 @@ public class MainModel extends BaseModel implements MainContract.Model {
     }
 
     @Override
-    public Observable<RangeSearchBean> rangeSearchSite(Map<String, Object> map) {
+    public Observable<BaseResponse<RangeSearchBean>> rangeSearchSite(Map<String, Object> map) {
        return mRepositoryManager.obtainRetrofitService(SiteService.class).rangeSearchSite(map);
     }
 
