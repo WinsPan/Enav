@@ -26,11 +26,13 @@ import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
+import com.tcup.transformer.transnav.bean.MessageEvent;
 import com.tcup.transformer.transnav.di.component.DaggerLocationListComponent;
 import com.tcup.transformer.transnav.mvp.contract.LocationListContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.LocationListPresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -188,6 +190,7 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.toolbar_back_head:
+                EventBus.getDefault().post(new MessageEvent(false));
                 killMyself();
                 break;
             default:

@@ -90,14 +90,12 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     ImageButton pickImgBtn;
 
     private int typeIndex = 0;
-    private int areaIndex = 0;
     private String siteStatu = "1";
 
 
     private List<TypeBean> typeBeanList = new ArrayList<TypeBean>();
     private String[] typeString;
     private List<AreaBean> areaBeanList = new ArrayList<AreaBean>();
-    private String[] areaString;
     @Inject
     RxPermissions mRxPermissions;
 
@@ -120,13 +118,13 @@ public class AddSiteActivity extends BaseActivity<AddSitePresenter> implements A
     public void initData(@Nullable Bundle savedInstanceState) {
 
         mTitle.setText("新增站点");
-        siteTypeText.setOnClickListener(this::onClick);
-//        siteAreaText.setOnClickListener(this::onClick);
-        siteDateText.setOnClickListener(this::onClick);
-        pickImgBtn.setOnClickListener(this::onClick);
-        mBack.setOnClickListener(this::onClick);
-        submitBtn.setOnClickListener(this::onClick);
-        radioGroup.setOnCheckedChangeListener(this::onCheckedChanged);
+        siteTypeText.setOnClickListener(this);
+//        siteAreaText.setOnClickListener(this);
+        siteDateText.setOnClickListener(this);
+        pickImgBtn.setOnClickListener(this);
+        mBack.setOnClickListener(this);
+        submitBtn.setOnClickListener(this);
+        radioGroup.setOnCheckedChangeListener(this);
         siteLanEdt.setText(getIntent().getStringExtra("lonlat"));
     }
 

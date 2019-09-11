@@ -39,8 +39,10 @@ import com.jess.arms.utils.ArmsUtils;
 import com.jess.arms.utils.LogUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tcup.transformer.transnav.R;
+import com.tcup.transformer.transnav.bean.MessageEvent;
 import com.tcup.transformer.transnav.di.component.DaggerMainComponent;
 import com.tcup.transformer.transnav.map.overlay.WindowAdapter;
+import com.tcup.transformer.transnav.map.util.ToastUtil;
 import com.tcup.transformer.transnav.mvp.contract.MainContract;
 import com.tcup.transformer.transnav.mvp.model.entity.SiteListBean;
 import com.tcup.transformer.transnav.mvp.presenter.MainPresenter;
@@ -113,6 +115,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     private boolean isFirstLoc = true;
     BottomSheetBehavior behavior;
 
+    private boolean stopLocation = false;
+
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
         DaggerMainComponent //如找不到该类,请编译一下项目
@@ -139,9 +143,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 //这里是bottomSheet 状态的改变
-                if (newState==BottomSheetBehavior.STATE_EXPANDED){
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     bottomNav.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     bottomNav.setVisibility(View.GONE);
                 }
             }
@@ -213,7 +217,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         aMap.setOnMyLocationChangeListener(this);
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE);
-        myLocationStyle.interval(10000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
+        myLocationStyle.interval(2000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
         myLocationStyle.strokeColor(Color.TRANSPARENT);//设置定位蓝点精度圆圈的边框颜色
         myLocationStyle.radiusFillColor(Color.TRANSPARENT);//设置定位蓝点精度圆圈的填充颜色
         aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
@@ -402,6 +406,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSiteListBean(SiteListBean siteListBean) {
+        stopLocation = true;
         this.siteListBean = siteListBean;
         rangeSiteLists.clear();
         rangeSiteLists.add(siteListBean);
@@ -411,8 +416,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             if (aMap == null) {
                 aMap = mMapView.getMap();
                 mUiSettings = aMap.getUiSettings();
-                aMap.clear();
             }
+            aMap.clear();
             aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListBean.getSiteLat()), Double.valueOf(siteListBean.getSiteLng())), 13, 0, 0)));
             aMap.addMarker(new MarkerOptions()
                     .position(new LatLng(Double.valueOf(siteListBean.getSiteLat()),//设置纬度
@@ -428,6 +433,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             //绑定信息窗点击事件
             aMap.setOnInfoWindowClickListener(this);
             aMap.setOnMarkerClickListener(this);
+        } else {
+            ToastUtil.show(MainActivity.this, "该站点位置信息录入有误，请联系管理员");
         }
     }
 
@@ -465,9 +472,14 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Override
     public void onMyLocationChange(Location location) {
-        if (location == null) {
+        if (location == null || stopLocation) {
             return;
         }
         mPresenter.getRangeSites(String.valueOf(location.getLongitude()), String.valueOf(location.getLatitude()));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStopLocation(MessageEvent msg) {
+        this.stopLocation = Boolean.valueOf(msg.getMsg().toString());
     }
 }

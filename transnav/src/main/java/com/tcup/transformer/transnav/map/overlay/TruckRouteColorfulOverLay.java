@@ -219,7 +219,6 @@ public class TruckRouteColorfulOverLay extends RouteOverlay{
   }
     
     /**
-     * @param driveStep
      * @param latLng
      */
     private void addLimitMarker(TruckStep step, LatLng latLng) {
