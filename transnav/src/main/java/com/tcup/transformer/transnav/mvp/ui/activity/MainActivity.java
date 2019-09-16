@@ -418,7 +418,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
                 mUiSettings = aMap.getUiSettings();
             }
             aMap.clear();
-            aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListBean.getSiteLat()), Double.valueOf(siteListBean.getSiteLng())), 13, 0, 0)));
+            aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(Double.valueOf(siteListBean.getSiteLat()), Double.valueOf(siteListBean.getSiteLng())), 17, 0, 0)));
             aMap.addMarker(new MarkerOptions()
                     .position(new LatLng(Double.valueOf(siteListBean.getSiteLat()),//设置纬度
                             Double.valueOf(siteListBean.getSiteLng())))//设置经度

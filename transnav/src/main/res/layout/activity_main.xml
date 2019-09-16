@@ -24,6 +24,7 @@
         android:id="@+id/bottomMain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dp100"
         app:behavior_hideable="false"
         app:behavior_peekHeight="@dimen/dp100"
         app:layout_behavior="@string/bottom_sheet_behavior"
@@ -138,26 +139,27 @@
                 android:textSize="14sp"
                 tools:text="站点备注" />
 
+            <LinearLayout
+                android:id="@+id/bottomNav"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_item"
+                android:orientation="vertical"
+                android:visibility="gone">
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/blue_light"
+                    android:gravity="center"
+                    android:text="导  航"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
         </LinearLayout>
+
     </android.support.v4.widget.NestedScrollView>
-    <LinearLayout
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_gravity="bottom"
-        android:background="@drawable/bg_item"
-        android:orientation="vertical"
-        android:visibility="gone">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/blue_light"
-            android:gravity="center"
-            android:text="导  航"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-
-    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
