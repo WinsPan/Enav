@@ -144,9 +144,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 //这里是bottomSheet 状态的改变
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomNav.setVisibility(View.VISIBLE);
+//                    bottomNav.setVisibility(View.VISIBLE);
                 } else {
-                    bottomNav.setVisibility(View.GONE);
+//                    bottomNav.setVisibility(View.GONE);
                 }
             }
 
@@ -325,7 +325,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 //        }
         if (bottomMain.getVisibility() == View.VISIBLE) {
             bottomMain.setVisibility(View.GONE);
-            bottomNav.setVisibility(View.GONE);
+//            bottomNav.setVisibility(View.GONE);
         }
         mMapView.onResume();
 //        initMark();

@@ -24,7 +24,6 @@
         android:id="@+id/bottomMain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/dp100"
         app:behavior_hideable="false"
         app:behavior_peekHeight="@dimen/dp100"
         app:layout_behavior="@string/bottom_sheet_behavior"
@@ -145,8 +144,7 @@
                 android:layout_height="48dp"
                 android:layout_gravity="bottom"
                 android:background="@drawable/bg_item"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="match_parent"
