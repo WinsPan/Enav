@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +13,7 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
@@ -357,6 +359,20 @@ public class SerchActivityActivity extends BaseActivity<SerchActivityPresenter> 
         siteLonText.setText("站点经度：" + (siteListMarkBean.getSiteLng() == null ? "" : siteListMarkBean.getSiteLng()));
         siteLatText.setText("站点纬度：" + (siteListMarkBean.getSiteLat() == null ? "" : siteListMarkBean.getSiteLat()));
         siteTypeText.setText("站点类型：" + (siteListMarkBean.getEqpTypeDomain().getTypeName() == null ? "" : siteListMarkBean.getEqpTypeDomain().getTypeName()));
+        if (siteListMarkBean.getEqpTypeDomain().getTypeName() != null
+                && (siteListMarkBean.getEqpTypeDomain().getTypeName().contains("上")
+                || siteListMarkBean.getEqpTypeDomain().getTypeName().contains("外")
+                || siteListMarkBean.getEqpTypeDomain().getTypeName().contains("未知"))) {
+            Drawable addr = ContextCompat.getDrawable(this, R.drawable.shiwaishebei);
+            addr.setBounds(0,0,40,40);
+            siteTypeText.setCompoundDrawables(null, null, addr, null);
+            siteTypeText.setCompoundDrawablePadding(30);
+        }else {
+            Drawable addr = ContextCompat.getDrawable(this, R.drawable.shineishebei);
+            addr.setBounds(0,0,40,40);
+            siteTypeText.setCompoundDrawables(null, null, addr, null);
+            siteTypeText.setCompoundDrawablePadding(30);
+        }
         siteAreaText.setText("站点区域：" + (siteListMarkBean.getEqpAreaDomain().getRegion() == null ? "" : siteListMarkBean.getEqpAreaDomain().getRegion()));
         siteStatusText.setText("站点状态：" + (siteListMarkBean.getSiteStatus() == null ? "" : (siteListMarkBean.getSiteStatus()).equals("1") ? "正常" : "故障"));
         siteMarkText.setText("站点备注：" + (siteListMarkBean.getSiteRemark() == null ? "" : siteListMarkBean.getSiteRemark()));
