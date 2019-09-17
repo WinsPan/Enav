@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">变电站定位</string>
     <string name="shebei_list">设备列表</string>
-    <string name="shebei_research">设备搜索</string>
+    <string name="shebei_research">范围搜索</string>
     <string name="shebei_luru">设备录入</string>
     <string name="loading">正在加载…</string>
     <string name="no_location">附近没有其它地点</string>

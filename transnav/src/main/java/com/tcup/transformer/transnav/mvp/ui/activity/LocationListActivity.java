@@ -198,9 +198,10 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
     public void onSiteListBean(SiteListBean siteListBean) {
         if (siteListBean.getSiteLat() != null && siteListBean.getSiteLng() != null) {
+            ArmsUtils.startActivity(new Intent(LocationListActivity.this,SiteDetailActivity.class));
             killMyself();
         }
     }

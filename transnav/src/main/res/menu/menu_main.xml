@@ -16,15 +16,15 @@
                 android:title="@string/shebei_list"
                 app:showAsAction="ifRoom" />
 
-<!--            <item-->
-<!--                android:id="@+id/action_research"-->
-<!--                android:icon="@drawable/ic_person_add_black_24dp"-->
-<!--                android:title="@string/shebei_research"-->
-<!--                app:showAsAction="ifRoom" />-->
+            <item
+                android:id="@+id/action_research"
+                android:icon="@drawable/ic_info_outline_black_24dp"
+                android:title="@string/shebei_research"
+                app:showAsAction="ifRoom" />
 
             <item
                 android:id="@+id/action_luru"
-                android:icon="@drawable/ic_info_outline_black_24dp"
+                android:icon="@drawable/ic_person_add_black_24dp"
                 android:title="@string/shebei_luru"
                 app:showAsAction="ifRoom" />
         </menu>

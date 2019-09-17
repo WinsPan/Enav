@@ -10,13 +10,14 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".mvp.ui.activity.AddSiteActivity"></activity>
+        <activity android:name=".mvp.ui.activity.SiteDetailActivity"></activity>
+        <activity android:name=".mvp.ui.activity.SerchActivityActivity" />
+        <activity android:name=".mvp.ui.activity.AddSiteActivity" />
         <activity android:name=".mvp.ui.activity.PickListActivity" />
         <activity android:name=".mvp.ui.activity.PickLocationActivity" />
         <activity android:name=".mvp.ui.activity.BasicNaviActivity" />
         <activity android:name=".mvp.ui.activity.NavigationActivity" />
         <activity android:name=".mvp.ui.activity.LocationListActivity" />
-
         <activity
             android:name=".mvp.ui.activity.MainActivity"
             android:screenOrientation="portrait">
