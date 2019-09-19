@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -78,6 +79,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         AMap.OnInfoWindowClickListener, AMap.OnMyLocationChangeListener {
     @BindView(R.id.map)
     MapView mMapView;
+    @BindView(R.id.search_list)
+    ImageView imageView;
     @BindView(R.id.site_title_show)
     TextView siteTitleText;
     @BindView(R.id.site_no_show)
@@ -139,6 +142,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
         bottomNav.setOnClickListener(this);
+        imageView.setOnClickListener(this);
         View bottomSheet = findViewById(R.id.bottomMain);
         behavior = BottomSheetBehavior.from(bottomSheet);
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -242,6 +246,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
                 intent.putExtra("startNav", startNav);
                 intent.putExtra("endNav", endNav);
                 ArmsUtils.startActivity(intent);
+                break;
+            case R.id.search_list:
+                ArmsUtils.startActivity(new Intent(MainActivity.this, LocationListActivity.class));
                 break;
             default:
                 break;
@@ -371,9 +378,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_list:
-                ArmsUtils.startActivity(new Intent(MainActivity.this, LocationListActivity.class));
-                return true;
+//            case R.id.action_list:
+//                ArmsUtils.startActivity(new Intent(MainActivity.this, LocationListActivity.class));
+//                return true;
             case R.id.action_research:
                 ArmsUtils.startActivity(new Intent(MainActivity.this, SerchActivityActivity.class));
                 return true;

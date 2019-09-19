@@ -10,11 +10,11 @@
 
         <menu>
 
-            <item
+         <!--   <item
                 android:id="@+id/action_list"
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:title="@string/shebei_list"
-                app:showAsAction="ifRoom" />
+                app:showAsAction="ifRoom" />-->
 
             <item
                 android:id="@+id/action_research"
