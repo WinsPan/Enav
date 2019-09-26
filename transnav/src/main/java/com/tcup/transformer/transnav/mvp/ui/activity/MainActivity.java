@@ -240,11 +240,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bottomNav:
-                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
-                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+                String startNavStr = aMap.getMyLocation().getLatitude() + "-" + aMap.getMyLocation().getLongitude();
+//                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
+//                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+                String endNavStr = siteLatText.getText().toString().split("：")[1] + "-" + siteLonText.getText().toString().split("：")[1];
                 Intent intent = new Intent(MainActivity.this, NavigationActivity.class);
-                intent.putExtra("startNav", startNav);
-                intent.putExtra("endNav", endNav);
+                intent.putExtra("startNavStr", startNavStr);
+                intent.putExtra("endNavStr", endNavStr);
                 ArmsUtils.startActivity(intent);
                 break;
             case R.id.search_list:
@@ -288,12 +290,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
                 || siteListMarkBean.getEqpTypeDomain().getTypeName().contains("外")
                 || siteListMarkBean.getEqpTypeDomain().getTypeName().contains("未知"))) {
             Drawable addr = ContextCompat.getDrawable(this, R.drawable.shiwaishebei);
-            addr.setBounds(0,0,40,40);
+            addr.setBounds(0, 0, 40, 40);
             siteTypeText.setCompoundDrawables(null, null, addr, null);
             siteTypeText.setCompoundDrawablePadding(30);
-        }else {
+        } else {
             Drawable addr = ContextCompat.getDrawable(this, R.drawable.shineishebei);
-            addr.setBounds(0,0,40,40);
+            addr.setBounds(0, 0, 40, 40);
             siteTypeText.setCompoundDrawables(null, null, addr, null);
             siteTypeText.setCompoundDrawablePadding(30);
         }

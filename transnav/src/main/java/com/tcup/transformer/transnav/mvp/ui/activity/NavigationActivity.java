@@ -162,8 +162,10 @@ public class NavigationActivity extends BaseActivity<NavigationPresenter> implem
         mTabLayout.addTab(mTabLayout.newTab().setText("步行"));
 //        mTabLayout.addTab(mTabLayout.newTab().setText("骑车"));
         tvNavi.setOnClickListener(this);
-        NaviLatLng startNav = (NaviLatLng) getIntent().getParcelableExtra("startNav");
-        NaviLatLng endNav = (NaviLatLng) getIntent().getParcelableExtra("endNav");
+        String startNavStr = getIntent().getStringExtra("startNavStr");
+        String endNavStr = getIntent().getStringExtra("endNavStr");
+        NaviLatLng startNav = new NaviLatLng(Double.valueOf(startNavStr.split("-")[0]), Double.valueOf(startNavStr.split("-")[1]));
+        NaviLatLng endNav = new NaviLatLng(Double.valueOf(endNavStr.split("-")[0]), Double.valueOf(endNavStr.split("-")[1]));
         startList.add(startNav);
         endList.add(endNav);
         //添加Tab点击事件
