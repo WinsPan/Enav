@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.View;
 
 import com.amap.api.navi.AMapNavi;
 import com.amap.api.navi.AMapNaviListener;
@@ -29,6 +30,9 @@ import com.autonavi.tbt.TrafficFacilityInfo;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
+import com.kongzue.dialog.interfaces.OnDialogButtonClickListener;
+import com.kongzue.dialog.util.BaseDialog;
+import com.kongzue.dialog.v3.MessageDialog;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.di.component.DaggerBasicNaviComponent;
 import com.tcup.transformer.transnav.map.util.ToastUtil;
@@ -343,7 +347,21 @@ public class BasicNaviActivity extends BaseActivity<BasicNaviPresenter> implemen
 
     @Override
     public boolean onNaviBackClick() {
-        return false;
+        MessageDialog.show(BasicNaviActivity.this, "提示", "确定退出导航？", "确定", "取消")
+                .setOnOkButtonClickListener(new OnDialogButtonClickListener() {
+                    @Override
+                    public boolean onClick(BaseDialog baseDialog, View v) {
+                        finish();
+                        return false;
+                    }
+                })
+                .setOnCancelButtonClickListener(new OnDialogButtonClickListener() {
+                    @Override
+                    public boolean onClick(BaseDialog baseDialog, View v) {
+                        return false;
+                    }
+                });
+        return true;
     }
 
     @Override
