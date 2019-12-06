@@ -96,7 +96,7 @@ public class LocationListActivity extends BaseActivity<LocationListPresenter> im
 
     @Override
     public void initData(@Nullable Bundle savedInstanceState) {
-        mTitle.setText("变压器列表");
+        mTitle.setText("变电站列表");
         mSearchView.setOnQueryTextListener(this);
         mCheckBox.setOnCheckedChangeListener(this);
         mBack.setOnClickListener(this::onClick);

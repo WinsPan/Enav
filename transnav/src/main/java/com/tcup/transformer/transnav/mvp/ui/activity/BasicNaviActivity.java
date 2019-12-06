@@ -347,20 +347,21 @@ public class BasicNaviActivity extends BaseActivity<BasicNaviPresenter> implemen
 
     @Override
     public boolean onNaviBackClick() {
-        MessageDialog.show(BasicNaviActivity.this, "提示", "确定退出导航？", "确定", "取消")
-                .setOnOkButtonClickListener(new OnDialogButtonClickListener() {
-                    @Override
-                    public boolean onClick(BaseDialog baseDialog, View v) {
-                        finish();
-                        return false;
-                    }
-                })
-                .setOnCancelButtonClickListener(new OnDialogButtonClickListener() {
-                    @Override
-                    public boolean onClick(BaseDialog baseDialog, View v) {
-                        return false;
-                    }
-                });
+//        MessageDialog.show(BasicNaviActivity.this, "提示", "确定退出导航？", "确定", "取消")
+//                .setOnOkButtonClickListener(new OnDialogButtonClickListener() {
+//                    @Override
+//                    public boolean onClick(BaseDialog baseDialog, View v) {
+//                        finish();
+//                        return false;
+//                    }
+//                })
+//                .setOnCancelButtonClickListener(new OnDialogButtonClickListener() {
+//                    @Override
+//                    public boolean onClick(BaseDialog baseDialog, View v) {
+//                        return false;
+//                    }
+//                });
+        finish();
         return true;
     }
 
