@@ -505,6 +505,11 @@ public class NavigationActivity extends BaseActivity<NavigationPresenter> implem
     }
 
     @Override
+    public void onGpsSignalWeak(boolean b) {
+
+    }
+
+    @Override
     public void onNaviSetting() {
 
     }

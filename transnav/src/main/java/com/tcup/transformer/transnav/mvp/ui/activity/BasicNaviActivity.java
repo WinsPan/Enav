@@ -336,6 +336,11 @@ public class BasicNaviActivity extends BaseActivity<BasicNaviPresenter> implemen
     }
 
     @Override
+    public void onGpsSignalWeak(boolean b) {
+
+    }
+
+    @Override
     public void onNaviSetting() {
 
     }
