@@ -33,7 +33,6 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
-import com.amap.api.navi.model.NaviLatLng;
 import com.jess.arms.base.BaseActivity;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
@@ -317,11 +316,19 @@ public class SiteDetailActivity extends BaseActivity<SiteDetailPresenter> implem
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bottomNav:
-                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
-                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+//                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
+//                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+//                Intent intent = new Intent(SiteDetailActivity.this, NavigationActivity.class);
+//                intent.putExtra("startNav", startNav);
+//                intent.putExtra("endNav", endNav);
+//                ArmsUtils.startActivity(intent);
+                String startNavStr = aMap.getMyLocation().getLatitude() + "-" + aMap.getMyLocation().getLongitude();
+//                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
+//                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+                String endNavStr = siteLatText.getText().toString().split("：")[1] + "-" + siteLonText.getText().toString().split("：")[1];
                 Intent intent = new Intent(SiteDetailActivity.this, NavigationActivity.class);
-                intent.putExtra("startNav", startNav);
-                intent.putExtra("endNav", endNav);
+                intent.putExtra("startNavStr", startNavStr);
+                intent.putExtra("endNavStr", endNavStr);
                 ArmsUtils.startActivity(intent);
                 break;
             case R.id.toolbar_back_head:

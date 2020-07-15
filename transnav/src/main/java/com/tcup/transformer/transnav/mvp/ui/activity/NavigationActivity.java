@@ -49,6 +49,7 @@ import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
 import com.tcup.transformer.transnav.R;
 import com.tcup.transformer.transnav.di.component.DaggerNavigationComponent;
+import com.tcup.transformer.transnav.map.util.ToastUtil;
 import com.tcup.transformer.transnav.mvp.contract.NavigationContract;
 import com.tcup.transformer.transnav.mvp.presenter.NavigationPresenter;
 import com.zhy.adapter.recyclerview.CommonAdapter;
@@ -164,6 +165,11 @@ public class NavigationActivity extends BaseActivity<NavigationPresenter> implem
         tvNavi.setOnClickListener(this);
         String startNavStr = getIntent().getStringExtra("startNavStr");
         String endNavStr = getIntent().getStringExtra("endNavStr");
+        if (startNavStr == null || endNavStr == null) {
+            ToastUtil.showerror(NavigationActivity.this, 1101);
+            finish();
+            return;
+        }
         NaviLatLng startNav = new NaviLatLng(Double.valueOf(startNavStr.split("-")[0]), Double.valueOf(startNavStr.split("-")[1]));
         NaviLatLng endNav = new NaviLatLng(Double.valueOf(endNavStr.split("-")[0]), Double.valueOf(endNavStr.split("-")[1]));
         startList.add(startNav);
