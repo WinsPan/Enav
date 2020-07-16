@@ -321,11 +321,18 @@ public class SerchActivityActivity extends BaseActivity<SerchActivityPresenter> 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bottomNav:
-                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
-                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+//                NaviLatLng startNav = new NaviLatLng(aMap.getMyLocation().getLatitude(), aMap.getMyLocation().getLongitude());
+//                NaviLatLng endNav = new NaviLatLng(Double.valueOf(siteLatText.getText().toString().split("：")[1]), Double.valueOf(siteLonText.getText().toString().split("：")[1]));
+//                Intent intent = new Intent(SerchActivityActivity.this, NavigationActivity.class);
+//                intent.putExtra("startNav", startNav);
+//                intent.putExtra("endNav", endNav);
+//                ArmsUtils.startActivity(intent);
+
+                String startNavStr = aMap.getMyLocation().getLatitude() + "-" + aMap.getMyLocation().getLongitude();
+                String endNavStr = siteLatText.getText().toString().split("：")[1] + "-" + siteLonText.getText().toString().split("：")[1];
                 Intent intent = new Intent(SerchActivityActivity.this, NavigationActivity.class);
-                intent.putExtra("startNav", startNav);
-                intent.putExtra("endNav", endNav);
+                intent.putExtra("startNavStr", startNavStr);
+                intent.putExtra("endNavStr", endNavStr);
                 ArmsUtils.startActivity(intent);
                 break;
             case R.id.toolbar_back_head:
